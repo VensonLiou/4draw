@@ -58,9 +58,14 @@ enum GameStatus {
 pub trait IFourDraw<TContractState> {
     fn randomness_contract(self: @TContractState) -> ContractAddress;
     fn ticket_payment_token(self: @TContractState) -> ContractAddress;
+    fn reveal_config(self: @TContractState) -> RevealConfig;
     fn latest_game_round(self: @TContractState) -> u256;
-    fn latest_tickets(self: @TContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256);
-
+    fn game_info(self: @TContractState, round: u256) -> GameInfo;
+    fn ticket_counter(self: @TContractState, round: u256, picked_number: u16) -> TicketCounter;
+    fn user_latest_round(self: @TContractState, account: ContractAddress) -> u256;
+    fn user_tickets(self: @TContractState, account: ContractAddress, round: u256) -> UserTicketInfo;
+    fn latest_tickets_result(self: @TContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256);
+    fn setRevealConfig(ref self: TContractState, reveal_config: RevealConfig);
     fn start_new_game(ref self: TContractState, ticket_price: u256, end_time: u64);
     fn request_reveal_result(ref self: TContractState, seed: u64);
     fn receive_random_words(
@@ -162,6 +167,7 @@ mod FourDraw {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
+        RevealConfigUpdated: RevealConfigUpdated,
         NewGameStarted: NewGameStarted,
         GameRevealRequested: GameRevealRequested,
         GameRevealed: GameRevealed,
@@ -175,6 +181,11 @@ mod FourDraw {
         ReentrancyGuardEvent: ReentrancyGuardComponent::Event
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct RevealConfigUpdated {
+        reveal_config: RevealConfig
+    }
+    
     #[derive(Drop, starknet::Event)]
     struct NewGameStarted {
         round: u256,
@@ -230,12 +241,40 @@ mod FourDraw {
             self.ticket_payment_token.read()
         }
 
+        fn reveal_config(self: @ContractState) -> RevealConfig {
+            self.reveal_config.read()
+        }
+
         fn latest_game_round(self: @ContractState) -> u256 {
             self.latest_game_round.read()
         }
 
-        fn latest_tickets(self: @ContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256) {
-            self._latest_tickets(account)
+        fn game_info(self: @ContractState, round: u256) -> GameInfo {
+            self.game_info.read(round)
+        }
+
+        fn ticket_counter(self: @ContractState, round: u256, picked_number: u16) -> TicketCounter {
+            self.ticket_counter.read((round, picked_number))
+        }
+
+        fn user_latest_round(self: @ContractState, account: ContractAddress) -> u256 {
+            self.user_latest_round.read(account)
+        }
+
+        fn user_tickets(self: @ContractState, account: ContractAddress, round: u256) -> UserTicketInfo {
+            self.user_tickets.read((account, round))
+        }
+
+        fn latest_tickets_result(self: @ContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256) {
+            self._latest_tickets_result(account)
+        }
+
+        fn setRevealConfig(ref self: ContractState, reveal_config: RevealConfig) {
+            self.ownable.assert_only_owner();
+
+            self.reveal_config.write(reveal_config);
+
+            self.emit(RevealConfigUpdated { reveal_config: reveal_config });
         }
 
         fn start_new_game(ref self: ContractState, ticket_price: u256, end_time: u64) {
@@ -418,7 +457,7 @@ mod FourDraw {
             (latest_game_round, latest_game_info)
         }
 
-        fn _latest_tickets(self: @ContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256) {
+        fn _latest_tickets_result(self: @ContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256) {
             let user_latest_round = self.user_latest_round.read(account);
             let user_tickets = self.user_tickets.read((account, user_latest_round));
             let game_info = self.game_info.read(user_latest_round);
@@ -451,7 +490,7 @@ mod FourDraw {
         }
 
         fn _claim_prize(ref self: ContractState, account: ContractAddress) -> u256 {
-            let (round, _, mut tickets, unclaimed_prize) = self._latest_tickets(account);
+            let (round, _, mut tickets, unclaimed_prize) = self._latest_tickets_result(account);
             if unclaimed_prize > 0 {
                 IERC20Dispatcher { contract_address: self.ticket_payment_token.read() }.transfer(account, unclaimed_prize);
                 tickets.claimed = true;

@@ -4,6 +4,7 @@ use starknet::ContractAddress;
 struct GameInfo {
     ticket_price: u256,
     end_time: u64,
+    randomness_request_id: u64,
     result: u16,
     game_status: GameStatus,
     total_straight_prize_accumulated: u256,
@@ -36,6 +37,13 @@ struct TicketCounter {
     straight_amount: u256,
     box_amount: u256,
     mini_amount: u256
+}
+
+#[derive(Copy, Drop, Serde, starknet::Store)]
+struct RevealConfig {
+    max_fee: u256,
+    callback_fee_limit: u128,
+    publish_delay: u64,
 }
 
 #[derive(PartialEq, Copy, Drop, Serde, starknet::Store)]
@@ -80,7 +88,8 @@ mod FourDraw {
         PrizeInfo,
         TicketCounter,
         UserTicketInfo,
-        GameStatus
+        GameStatus,
+        RevealConfig
     };
     use starknet::{
         ContractAddress,
@@ -133,6 +142,7 @@ mod FourDraw {
     struct Storage {
         randomness_contract: ContractAddress,
         ticket_payment_token: ContractAddress,
+        reveal_config: RevealConfig,
         latest_game_round: u256,
         game_info: LegacyMap::<u256, GameInfo>,
         prize_info: LegacyMap::<u256, PrizeInfo>,
@@ -151,6 +161,8 @@ mod FourDraw {
     #[derive(Drop, starknet::Event)]
     enum Event {
         NewGameStarted: NewGameStarted,
+        GameRevealRequested: GameRevealRequested,
+        GameRevealed: GameRevealed,
         TicketsBought: TicketsBought,
         PrizeClaimed: PrizeClaimed,
         #[flat]
@@ -166,6 +178,18 @@ mod FourDraw {
         round: u256,
         ticket_price: u256,
         end_time: u64
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct GameRevealRequested {
+        round: u256,
+        request_id: u64
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct GameRevealed {
+        round: u256,
+        result: u16
     }
 
     #[derive(Drop, starknet::Event)]
@@ -186,10 +210,12 @@ mod FourDraw {
     fn constructor(
         ref self: ContractState,
         randomness_contract: ContractAddress,
-        ticket_payment_token: ContractAddress
+        ticket_payment_token: ContractAddress,
+        reveal_config: RevealConfig
     ) {
         self.randomness_contract.write(randomness_contract);
         self.ticket_payment_token.write(ticket_payment_token);
+        self.reveal_config.write(reveal_config);
     }
 
     #[abi(embed_v0)]
@@ -239,6 +265,7 @@ mod FourDraw {
             self.game_info.write(new_game_round, GameInfo {
                 ticket_price: ticket_price,
                 end_time: end_time,
+                randomness_request_id: 0,
                 result: 0,
                 game_status: GameStatus::Started,
                 total_straight_prize_accumulated: total_straight_prize_accumulated,
@@ -256,9 +283,24 @@ mod FourDraw {
             assert(game_info.game_status == GameStatus::Started, Errors::INVALID_GAME_STATUS);
             assert(game_info.end_time <= get_block_timestamp(), Errors::INVALID_TIMESTAMP);
 
+            let reveal_config = self.reveal_config.read();
+            IERC20Dispatcher { contract_address: self.ticket_payment_token.read() }.approve(
+                self.randomness_contract.read(),
+                reveal_config.max_fee
+            );
+            let request_id = IRandomnessDispatcher { contract_address: self.randomness_contract.read() }.request_random(
+                seed,
+                get_contract_address(),
+                reveal_config.callback_fee_limit,
+                reveal_config.publish_delay,
+                1,
+                ArrayTrait::<felt252>::new()
+            );
             game_info.game_status = GameStatus::Revealing;
+            game_info.randomness_request_id = request_id;
+            self.game_info.write(round, game_info);
             
-            // emit
+            self.emit(GameRevealRequested { round: round, request_id: request_id });
             self.reentrancy_guard.end();
         }
 

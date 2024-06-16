@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 
 const Providers = ({ children }: { children: ReactNode }) => {
   return (
-    <ChakraProvider>
+    <ChakraProvider resetCSS={false}>
       {children}
     </ChakraProvider>
   )

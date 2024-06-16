@@ -6,9 +6,36 @@ struct GameInfo {
     end_time: u64,
     result: u16,
     game_status: GameStatus,
-    total_straight_accumulated: u256,
-    total_box_accumulated: u256,
-    total_mini_accumulated: u256
+    total_straight_prize_accumulated: u256,
+    total_box_prize_accumulated: u256,
+    total_mini_prize_accumulated: u256
+}
+
+#[derive(Copy, Drop, Serde, starknet::Store)]
+struct PrizeInfo {
+    total_straight_won: u256,
+    total_box_won: u256,
+    total_mini_won: u256,
+    single_straight_prize: u256,
+    single_box_prize: u256,
+    single_mini_prize: u256
+}
+
+#[derive(Copy, Drop, Serde, starknet::Store)]
+struct UserTicketInfo {
+    picked: u16,
+    claimed: bool,
+    straight_amount: u256,
+    box_amount: u256,
+    set_amount: u256,
+    mini_amount: u256
+}
+
+#[derive(Copy, Drop, Serde, starknet::Store)]
+struct TicketCounter {
+    straight_amount: u256,
+    box_amount: u256,
+    mini_amount: u256
 }
 
 #[derive(PartialEq, Copy, Drop, Serde, starknet::Store)]
@@ -24,7 +51,7 @@ pub trait IFourDraw<TContractState> {
     fn randomness_contract(self: @TContractState) -> ContractAddress;
     fn ticket_payment_token(self: @TContractState) -> ContractAddress;
     fn latest_game_round(self: @TContractState) -> u256;
-    fn unclaimed_balance(self: @TContractState, account: ContractAddress) -> u256;
+    fn latest_tickets(self: @TContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256);
 
     fn start_new_game(ref self: TContractState, ticket_price: u256, end_time: u64);
     fn request_reveal_result(ref self: TContractState, seed: u64);
@@ -37,17 +64,22 @@ pub trait IFourDraw<TContractState> {
     );
     fn buy_tickets(
         ref self: TContractState,
+        picked: u16,
         straight_amount: u256,
         box_amount: u256,
+        set_amount: u256,
         mini_amount: u256
     ) -> u256;
-    fn claim_balance(ref self: TContractState) -> u256;
+    fn claim_prize(ref self: TContractState) -> u256;
 }
 
 #[starknet::contract]
 mod FourDraw {
     use super::{
         GameInfo,
+        PrizeInfo,
+        TicketCounter,
+        UserTicketInfo,
         GameStatus
     };
     use starknet::{
@@ -63,6 +95,7 @@ mod FourDraw {
         security::ReentrancyGuardComponent,
         token::erc20::interface::{ IERC20Dispatcher, IERC20DispatcherTrait }
     };
+    use alexandria_sorting::MergeSort;
     use four_draw::randomness:: { IRandomnessDispatcher, IRandomnessDispatcherTrait };
 
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
@@ -91,6 +124,9 @@ mod FourDraw {
         pub const INVALID_TIMESTAMP: felt252 = 'invalid timestamp';
         pub const CALLER_NOT_RANDOMNESS_CONTRACT: felt252 = 'caller not randomness contract';
         pub const FULFILLMENT_DELAY_TOO_SHORT: felt252 = 'fulfillment delay too short';
+        pub const INVALID_NUMBER: felt252 = 'invalid number';
+        pub const ALREADY_PICKED: felt252 = 'already picked';
+        pub const INVALID_AMOUNT: felt252 = 'invalid amount';
     }
 
     #[storage]
@@ -99,7 +135,10 @@ mod FourDraw {
         ticket_payment_token: ContractAddress,
         latest_game_round: u256,
         game_info: LegacyMap::<u256, GameInfo>,
-        ticket_price: u256,
+        prize_info: LegacyMap::<u256, PrizeInfo>,
+        ticket_counter: LegacyMap::<(u256, u16), TicketCounter>,
+        user_latest_round: LegacyMap::<ContractAddress, u256>,
+        user_tickets: LegacyMap::<(ContractAddress, u256), UserTicketInfo>,
         #[substorage(v0)]
         upgradeable: UpgradeableComponent::Storage,
         #[substorage(v0)]
@@ -112,6 +151,8 @@ mod FourDraw {
     #[derive(Drop, starknet::Event)]
     enum Event {
         NewGameStarted: NewGameStarted,
+        TicketsBought: TicketsBought,
+        PrizeClaimed: PrizeClaimed,
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event,
         #[flat]
@@ -125,6 +166,22 @@ mod FourDraw {
         round: u256,
         ticket_price: u256,
         end_time: u64
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct TicketsBought {
+        account: ContractAddress,
+        straight_amount: u256,
+        box_amount: u256,
+        set_amount: u256,
+        mini_amount: u256
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct PrizeClaimed {
+        account: ContractAddress,
+        round: u256,
+        prize: u256 
     }
 
     #[constructor]
@@ -151,8 +208,8 @@ mod FourDraw {
             self.latest_game_round.read()
         }
 
-        fn unclaimed_balance(self: @ContractState, account: ContractAddress) -> u256 {
-            1
+        fn latest_tickets(self: @ContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256) {
+            self._latest_tickets(account)
         }
 
         fn start_new_game(ref self: ContractState, ticket_price: u256, end_time: u64) {
@@ -172,9 +229,9 @@ mod FourDraw {
                 end_time: end_time,
                 result: 0,
                 game_status: GameStatus::Started,
-                total_straight_accumulated: 0,
-                total_box_accumulated: 0,
-                total_mini_accumulated: 0
+                total_straight_prize_accumulated: 0,
+                total_box_prize_accumulated: 0,
+                total_mini_prize_accumulated: 0
             });
             
             self.emit(NewGameStarted { round: new_game_round, ticket_price: ticket_price, end_time: end_time });
@@ -207,23 +264,61 @@ mod FourDraw {
 
         fn buy_tickets(
             ref self: ContractState,
+            picked: u16,
             straight_amount: u256,
             box_amount: u256,
+            set_amount: u256,
             mini_amount: u256
         ) -> u256 {
             self.reentrancy_guard.start();
+            let (round, mut info) = self._get_latest_game();
+            assert(picked < 10000, Errors::INVALID_NUMBER);
+            assert(info.game_status == GameStatus::Started, Errors::INVALID_GAME_STATUS);
+            assert(info.end_time > get_block_timestamp(), Errors::INVALID_TIMESTAMP);
+            let caller = get_caller_address();
+            assert(self.user_latest_round.read(caller) == round, Errors::ALREADY_PICKED);
 
-            // emit
+            self._claim_prize(caller);
+            let straight_cost = info.ticket_price * (straight_amount + set_amount);
+            let box_cost = info.ticket_price * (box_amount + set_amount);
+            let mini_cost = info.ticket_price * mini_amount;
+            let total_cost = straight_cost + box_cost + mini_cost;
+            assert(total_cost > 0, Errors::INVALID_AMOUNT);
+            IERC20Dispatcher { contract_address: self.ticket_payment_token.read() }.transfer_from(
+                caller,
+                get_contract_address(),
+                total_cost
+            );
+
+            info.total_straight_prize_accumulated += straight_cost;
+            info.total_box_prize_accumulated += box_cost;
+            info.total_mini_prize_accumulated += mini_cost;
+            self.game_info.write(round, info);
+
+            let mut ticket_counter = self.ticket_counter.read((round, picked));
+            ticket_counter.straight_amount += straight_amount + set_amount;
+            ticket_counter.box_amount += box_amount + set_amount;
+            ticket_counter.mini_amount += mini_amount;
+            self.ticket_counter.write((round, picked), ticket_counter);
+
+            self.emit(TicketsBought {
+                account: caller,
+                straight_amount: straight_amount,
+                box_amount: box_amount,
+                set_amount: set_amount,
+                mini_amount: mini_amount
+            });
             self.reentrancy_guard.end();
-            1
+            total_cost
         }
 
-        fn claim_balance(ref self: ContractState) -> u256 {
+        fn claim_prize(ref self: ContractState) -> u256 {
             self.reentrancy_guard.start();
 
-            // emit
+            let claimed_prize = self._claim_prize(get_caller_address());
+
             self.reentrancy_guard.end();
-            1
+            claimed_prize
         }
     }
 
@@ -236,8 +331,74 @@ mod FourDraw {
             (latest_game_round, latest_info)
         }
 
-        fn _calculate_balance(self: @ContractState) -> u256 {
-            1
+        fn _latest_tickets(self: @ContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256) {
+            let user_latest_round = self.user_latest_round.read(account);
+            let user_tickets = self.user_tickets.read((account, user_latest_round));
+            let game_info = self.game_info.read(user_latest_round);
+            let revealed = if game_info.game_status == GameStatus::Ended {
+                true
+            }
+            else {
+                false
+            };
+            let unclaimed_prize = if revealed && !user_tickets.claimed {
+                let prize_info = self.prize_info.read(user_latest_round);
+                let mut total_prize = 0;
+                if self._check_straight(game_info.result, user_tickets.picked) {
+                    total_prize += (user_tickets.straight_amount + user_tickets.set_amount) * prize_info.single_straight_prize;
+                }
+                if self._check_box(game_info.result, user_tickets.picked) {
+                    total_prize += (user_tickets.box_amount + user_tickets.set_amount) * prize_info.single_box_prize;
+                }
+                if self._check_mini(game_info.result, user_tickets.picked) {
+                    total_prize += user_tickets.mini_amount * prize_info.single_mini_prize;
+                }
+
+                total_prize
+            }
+            else {
+                0
+            };
+
+            (user_latest_round, revealed, user_tickets, unclaimed_prize)
+        }
+
+        fn _claim_prize(ref self: ContractState, account: ContractAddress) -> u256 {
+            let (round, _, mut tickets, unclaimed_prize) = self._latest_tickets(account);
+            if unclaimed_prize > 0 {
+                IERC20Dispatcher { contract_address: self.ticket_payment_token.read() }.transfer(account, unclaimed_prize);
+                tickets.claimed = true;
+                self.user_tickets.write((account, round), tickets);
+
+                self.emit(PrizeClaimed { account: account, round: round, prize: unclaimed_prize });
+            }
+            
+            unclaimed_prize
+        }
+
+        fn _check_straight(self: @ContractState, result: u16, picked: u16) -> bool {
+            result == picked
+        }
+
+        fn _check_box(self: @ContractState, result: u16, picked: u16) -> bool {
+            self._number_to_digits(result) == self._number_to_digits(picked)
+        }
+
+        fn _check_mini(self: @ContractState, result: u16, picked: u16) -> bool {
+            result % 1000 == picked % 1000
+        }
+
+        fn _number_to_digits(self: @ContractState, mut number: u16) -> Array<u16> {
+            let mut digits = ArrayTrait::new();
+            let mut i: u256 = 0;
+            while i < 4 {
+                digits.append(number % 10);
+                number /= 10;
+
+                i += 1;
+            };
+
+            MergeSort::sort(digits.span())
         }
     }
 }

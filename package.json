@@ -9,16 +9,25 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@starknet-react/chains": "^0.1.7",
+    "@starknet-react/core": "^2.8.2",
+    "decimal.js": "^10.4.3",
+    "jotai": "^2.8.1",
+    "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.4"
+    "react-hot-toast": "^2.4.1",
+    "react-loading": "^2.0.3",
+    "starknet": "^5.24.3",
+    "starknetkit": "^1.1.9"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@svgr/webpack": "^8.1.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.4"
+    "eslint-config-next": "14.2.4",
+    "typescript": "^5"
   }
 }

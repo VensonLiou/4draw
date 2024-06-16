@@ -1,0 +1,31 @@
+@import '../../css/mixins.styl'
+@import '../../css/variables.styl'
+
+.container
+  centerChild()
+  Button(700)
+  button()
+  background-color Primary
+  color White
+  padding-inline 24px
+  height 40px
+  border-radius 8px
+  transition transform 0.2s, opacity 0.2s
+  min-width 160px
+  &:not(&:disabled):hover
+    transform scale(1.02)
+  &:not(&:disabled):active
+    transform scale(0.97)
+    opacity 0.9
+  &:not(.secondary).outlined
+    background-color transparent
+    border 2px solid Primary
+    color Primary
+  &.secondary
+    background-color Secondary
+    &.outlined
+      background-color transparent
+      border 2px solid Secondary
+      color Secondary
+  &:disabled
+    opacity 0.5

@@ -171,10 +171,8 @@ mod FourDraw {
     #[derive(Drop, starknet::Event)]
     struct TicketsBought {
         account: ContractAddress,
-        straight_amount: u256,
-        box_amount: u256,
-        set_amount: u256,
-        mini_amount: u256
+        ticket_info: UserTicketInfo,
+        total_cost: u256
     }
 
     #[derive(Drop, starknet::Event)]
@@ -301,12 +299,21 @@ mod FourDraw {
             ticket_counter.mini_amount += mini_amount;
             self.ticket_counter.write((round, picked), ticket_counter);
 
-            self.emit(TicketsBought {
-                account: caller,
+            self.user_latest_round.write(caller, round);
+            let ticket_info = UserTicketInfo { 
+                picked: picked,
+                claimed: false,
                 straight_amount: straight_amount,
                 box_amount: box_amount,
                 set_amount: set_amount,
                 mini_amount: mini_amount
+            };
+            self.user_tickets.write((caller, round), ticket_info);
+
+            self.emit(TicketsBought {
+                account: caller,
+                ticket_info: ticket_info,
+                total_cost: total_cost
             });
             self.reentrancy_guard.end();
             total_cost

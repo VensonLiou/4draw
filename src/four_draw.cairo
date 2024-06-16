@@ -212,36 +212,51 @@ mod FourDraw {
 
         fn start_new_game(ref self: ContractState, ticket_price: u256, end_time: u64) {
             self.ownable.assert_only_owner();
-            let (round, info) = self._get_latest_game();
+            let (round, game_info) = self._get_latest_game();
             assert(
-                info.game_status == GameStatus::Ended || info.game_status == GameStatus::NotStarted,
+                game_info.game_status == GameStatus::Ended || game_info.game_status == GameStatus::NotStarted,
                 Errors::INVALID_GAME_STATUS
             );
             assert(get_block_timestamp() < end_time, Errors::INVALID_TIMESTAMP);
             
-
-            // accumulate last round prize
             let new_game_round = round + 1;
+            let mut total_straight_prize_accumulated = 0;
+            let mut total_box_prize_accumulated = 0;
+            let mut total_mini_prize_accumulated = 0;
+            if game_info.game_status == GameStatus::Ended {
+                let prize_info = self.prize_info.read(round);
+                if prize_info.total_straight_won == 0 {
+                    total_straight_prize_accumulated += game_info.total_straight_prize_accumulated;
+                }
+                if prize_info.total_box_won == 0 {
+                    total_box_prize_accumulated += game_info.total_box_prize_accumulated;
+                }
+                if prize_info.total_mini_won == 0 {
+                    total_mini_prize_accumulated += game_info.total_mini_prize_accumulated;
+                }
+            }
+
             self.game_info.write(new_game_round, GameInfo {
                 ticket_price: ticket_price,
                 end_time: end_time,
                 result: 0,
                 game_status: GameStatus::Started,
-                total_straight_prize_accumulated: 0,
-                total_box_prize_accumulated: 0,
-                total_mini_prize_accumulated: 0
+                total_straight_prize_accumulated: total_straight_prize_accumulated,
+                total_box_prize_accumulated: total_box_prize_accumulated,
+                total_mini_prize_accumulated: total_mini_prize_accumulated
             });
+            self.latest_game_round.write(new_game_round);
             
             self.emit(NewGameStarted { round: new_game_round, ticket_price: ticket_price, end_time: end_time });
         }
 
         fn request_reveal_result(ref self: ContractState, seed: u64) {
             self.reentrancy_guard.start();
-            let (round, mut info) = self._get_latest_game();
-            assert(info.game_status == GameStatus::Started, Errors::INVALID_GAME_STATUS);
-            assert(info.end_time <= get_block_timestamp(), Errors::INVALID_TIMESTAMP);
+            let (round, mut game_info) = self._get_latest_game();
+            assert(game_info.game_status == GameStatus::Started, Errors::INVALID_GAME_STATUS);
+            assert(game_info.end_time <= get_block_timestamp(), Errors::INVALID_TIMESTAMP);
 
-            info.game_status = GameStatus::Revealing;
+            game_info.game_status = GameStatus::Revealing;
             
             // emit
             self.reentrancy_guard.end();
@@ -269,17 +284,17 @@ mod FourDraw {
             mini_amount: u256
         ) -> u256 {
             self.reentrancy_guard.start();
-            let (round, mut info) = self._get_latest_game();
+            let (round, mut game_info) = self._get_latest_game();
             assert(picked < 10000, Errors::INVALID_NUMBER);
-            assert(info.game_status == GameStatus::Started, Errors::INVALID_GAME_STATUS);
-            assert(info.end_time > get_block_timestamp(), Errors::INVALID_TIMESTAMP);
+            assert(game_info.game_status == GameStatus::Started, Errors::INVALID_GAME_STATUS);
+            assert(game_info.end_time > get_block_timestamp(), Errors::INVALID_TIMESTAMP);
             let caller = get_caller_address();
             assert(self.user_latest_round.read(caller) == round, Errors::ALREADY_PICKED);
 
             self._claim_prize(caller);
-            let straight_cost = info.ticket_price * (straight_amount + set_amount);
-            let box_cost = info.ticket_price * (box_amount + set_amount);
-            let mini_cost = info.ticket_price * mini_amount;
+            let straight_cost = game_info.ticket_price * (straight_amount + set_amount);
+            let box_cost = game_info.ticket_price * (box_amount + set_amount);
+            let mini_cost = game_info.ticket_price * mini_amount;
             let total_cost = straight_cost + box_cost + mini_cost;
             assert(total_cost > 0, Errors::INVALID_AMOUNT);
             IERC20Dispatcher { contract_address: self.ticket_payment_token.read() }.transfer_from(
@@ -288,10 +303,10 @@ mod FourDraw {
                 total_cost
             );
 
-            info.total_straight_prize_accumulated += straight_cost;
-            info.total_box_prize_accumulated += box_cost;
-            info.total_mini_prize_accumulated += mini_cost;
-            self.game_info.write(round, info);
+            game_info.total_straight_prize_accumulated += straight_cost;
+            game_info.total_box_prize_accumulated += box_cost;
+            game_info.total_mini_prize_accumulated += mini_cost;
+            self.game_info.write(round, game_info);
 
             let mut ticket_counter = self.ticket_counter.read((round, picked));
             ticket_counter.straight_amount += straight_amount + set_amount;
@@ -333,9 +348,9 @@ mod FourDraw {
     impl InternalFunctions of InternalFunctionsTrait {
         fn _get_latest_game(self: @ContractState) -> (u256, GameInfo) {
             let latest_game_round = self.latest_game_round.read();
-            let latest_info = self.game_info.read(latest_game_round);
+            let latest_game_info = self.game_info.read(latest_game_round);
 
-            (latest_game_round, latest_info)
+            (latest_game_round, latest_game_info)
         }
 
         fn _latest_tickets(self: @ContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256) {

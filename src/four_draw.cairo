@@ -5,7 +5,7 @@ struct GameInfo {
     ticket_price: u256,
     end_time: u64,
     randomness_request_id: u64,
-    result: u16,
+    result_number: u16,
     game_status: GameStatus,
     total_straight_prize_accumulated: u256,
     total_box_prize_accumulated: u256,
@@ -24,7 +24,7 @@ struct PrizeInfo {
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 struct UserTicketInfo {
-    picked: u16,
+    picked_number: u16,
     claimed: bool,
     straight_amount: u256,
     box_amount: u256,
@@ -72,7 +72,7 @@ pub trait IFourDraw<TContractState> {
     );
     fn buy_tickets(
         ref self: TContractState,
-        picked: u16,
+        picked_number: u16,
         straight_amount: u256,
         box_amount: u256,
         set_amount: u256,
@@ -96,6 +96,7 @@ mod FourDraw {
         ClassHash,
         get_block_timestamp,
         get_caller_address,
+        get_block_number,
         get_contract_address
     };
     use openzeppelin::{
@@ -144,6 +145,7 @@ mod FourDraw {
         ticket_payment_token: ContractAddress,
         reveal_config: RevealConfig,
         latest_game_round: u256,
+        min_block_number: u64,
         game_info: LegacyMap::<u256, GameInfo>,
         prize_info: LegacyMap::<u256, PrizeInfo>,
         ticket_counter: LegacyMap::<(u256, u16), TicketCounter>,
@@ -189,7 +191,7 @@ mod FourDraw {
     #[derive(Drop, starknet::Event)]
     struct GameRevealed {
         round: u256,
-        result: u16
+        result_number: u16
     }
 
     #[derive(Drop, starknet::Event)]
@@ -266,7 +268,7 @@ mod FourDraw {
                 ticket_price: ticket_price,
                 end_time: end_time,
                 randomness_request_id: 0,
-                result: 0,
+                result_number: 0,
                 game_status: GameStatus::Started,
                 total_straight_prize_accumulated: total_straight_prize_accumulated,
                 total_box_prize_accumulated: total_box_prize_accumulated,
@@ -294,11 +296,12 @@ mod FourDraw {
                 reveal_config.callback_fee_limit,
                 reveal_config.publish_delay,
                 1,
-                ArrayTrait::<felt252>::new()
+                ArrayTrait::new()
             );
             game_info.game_status = GameStatus::Revealing;
             game_info.randomness_request_id = request_id;
             self.game_info.write(round, game_info);
+            self.min_block_number.write(get_block_number() + reveal_config.publish_delay);
             
             self.emit(GameRevealRequested { round: round, request_id: request_id });
             self.reentrancy_guard.end();
@@ -312,14 +315,34 @@ mod FourDraw {
             calldata: Array<felt252>
         ) {
             self.reentrancy_guard.start();
+            assert(get_caller_address() == self.randomness_contract.read(), Errors::CALLER_NOT_RANDOMNESS_CONTRACT);
+            assert(self.min_block_number.read() <= get_block_number(), Errors::FULFILLMENT_DELAY_TOO_SHORT);
 
-            // emit
+            let random_number: u16 = ((*random_words.at(0)).into() % 10000_u256).try_into().unwrap();
+            let (round, mut game_info) = self._get_latest_game();
+            let total_straight_won = self._total_straight_won(round, random_number);
+            let total_box_won = self._total_box_won(round, self._number_to_sorted_digits(random_number));
+            let total_mini_won = self._total_mini_won(round, random_number);
+
+            self.prize_info.write(round, PrizeInfo {
+                total_straight_won: total_straight_won,
+                total_box_won: total_box_won,
+                total_mini_won: total_mini_won,
+                single_straight_prize: self._calculate_single_prize(total_straight_won, game_info.total_straight_prize_accumulated),
+                single_box_prize: self._calculate_single_prize(total_box_won, game_info.total_box_prize_accumulated),
+                single_mini_prize: self._calculate_single_prize(total_mini_won, game_info.total_mini_prize_accumulated),
+            });
+            game_info.game_status = GameStatus::Ended;
+            game_info.result_number = random_number;
+            self.game_info.write(round, game_info);
+
+            self.emit(GameRevealed { round: round, result_number: random_number });
             self.reentrancy_guard.end();
         }
 
         fn buy_tickets(
             ref self: ContractState,
-            picked: u16,
+            picked_number: u16,
             straight_amount: u256,
             box_amount: u256,
             set_amount: u256,
@@ -327,7 +350,7 @@ mod FourDraw {
         ) -> u256 {
             self.reentrancy_guard.start();
             let (round, mut game_info) = self._get_latest_game();
-            assert(picked < 10000, Errors::INVALID_NUMBER);
+            assert(picked_number < 10000, Errors::INVALID_NUMBER);
             assert(game_info.game_status == GameStatus::Started, Errors::INVALID_GAME_STATUS);
             assert(game_info.end_time > get_block_timestamp(), Errors::INVALID_TIMESTAMP);
             let caller = get_caller_address();
@@ -350,15 +373,15 @@ mod FourDraw {
             game_info.total_mini_prize_accumulated += mini_cost;
             self.game_info.write(round, game_info);
 
-            let mut ticket_counter = self.ticket_counter.read((round, picked));
+            let mut ticket_counter = self.ticket_counter.read((round, picked_number));
             ticket_counter.straight_amount += straight_amount + set_amount;
             ticket_counter.box_amount += box_amount + set_amount;
             ticket_counter.mini_amount += mini_amount;
-            self.ticket_counter.write((round, picked), ticket_counter);
+            self.ticket_counter.write((round, picked_number), ticket_counter);
 
             self.user_latest_round.write(caller, round);
             let ticket_info = UserTicketInfo { 
-                picked: picked,
+                picked_number: picked_number,
                 claimed: false,
                 straight_amount: straight_amount,
                 box_amount: box_amount,
@@ -408,13 +431,13 @@ mod FourDraw {
             let unclaimed_prize = if revealed && !user_tickets.claimed {
                 let prize_info = self.prize_info.read(user_latest_round);
                 let mut total_prize = 0;
-                if self._check_straight(game_info.result, user_tickets.picked) {
+                if self._check_straight(game_info.result_number, user_tickets.picked_number) {
                     total_prize += (user_tickets.straight_amount + user_tickets.set_amount) * prize_info.single_straight_prize;
                 }
-                if self._check_box(game_info.result, user_tickets.picked) {
+                if self._check_box(game_info.result_number, user_tickets.picked_number) {
                     total_prize += (user_tickets.box_amount + user_tickets.set_amount) * prize_info.single_box_prize;
                 }
-                if self._check_mini(game_info.result, user_tickets.picked) {
+                if self._check_mini(game_info.result_number, user_tickets.picked_number) {
                     total_prize += user_tickets.mini_amount * prize_info.single_mini_prize;
                 }
 
@@ -440,19 +463,50 @@ mod FourDraw {
             unclaimed_prize
         }
 
-        fn _check_straight(self: @ContractState, result: u16, picked: u16) -> bool {
-            result == picked
+        fn _check_straight(self: @ContractState, result_number: u16, picked_number: u16) -> bool {
+            result_number == picked_number
         }
 
-        fn _check_box(self: @ContractState, result: u16, picked: u16) -> bool {
-            self._number_to_digits(result) == self._number_to_digits(picked)
+        fn _check_box(self: @ContractState, result_number: u16, picked_number: u16) -> bool {
+            self._number_to_sorted_digits(result_number) == self._number_to_sorted_digits(picked_number)
         }
 
-        fn _check_mini(self: @ContractState, result: u16, picked: u16) -> bool {
-            result % 1000 == picked % 1000
+        fn _check_mini(self: @ContractState, result_number: u16, picked_number: u16) -> bool {
+            result_number % 1000 == picked_number % 1000
         }
 
-        fn _number_to_digits(self: @ContractState, mut number: u16) -> Array<u16> {
+        fn _total_straight_won(self: @ContractState, round: u256, result_number: u16) -> u256 {
+            self.ticket_counter.read((round, result_number)).straight_amount
+        }
+
+        fn _total_box_won(self: @ContractState, round: u256, result_digits: Array<u16>) -> u256 {
+            let mut total_won = 0;
+            let mut i: u16 = 0;
+            while i < 10000 {
+                if result_digits == self._number_to_sorted_digits(i) {
+                    total_won += self.ticket_counter.read((round, i)). box_amount;
+                }
+
+                i += 1
+            };
+
+            total_won
+        }
+
+        fn _total_mini_won(self: @ContractState, round: u256, result_number: u16) -> u256 {
+            let last_3_digits_number = result_number % 1000;
+            let mut total_won = 0;
+            let mut i: u16 = 0;
+            while i < 10 {
+                total_won += self.ticket_counter.read((round, last_3_digits_number + 1000 * i)).mini_amount;
+
+                i += 1
+            };
+
+            total_won
+        }
+
+        fn _number_to_sorted_digits(self: @ContractState, mut number: u16) -> Array<u16> {
             let mut digits = ArrayTrait::new();
             let mut i: u256 = 0;
             while i < 4 {
@@ -463,6 +517,19 @@ mod FourDraw {
             };
 
             MergeSort::sort(digits.span())
+        }
+
+        fn _digits_to_number(self: @ContractState, digits: Array<u16>) -> u16 {
+            *digits.at(3) * 1000 + *digits.at(2) * 100 + *digits.at(1) * 10 + *digits.at(0)
+        }
+
+        fn _calculate_single_prize(self: @ContractState, total_won: u256, total_prize_accumulated: u256) -> u256 {
+            if total_won == 0 {
+                0
+            }
+            else {
+                total_prize_accumulated / total_won
+            }
         }
     }
 }

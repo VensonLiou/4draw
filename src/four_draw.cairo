@@ -414,9 +414,13 @@ mod FourDraw {
 
             let mut ticket_counter = self.ticket_counter.read((round, picked_number));
             ticket_counter.straight_amount += straight_amount + set_amount;
-            ticket_counter.box_amount += box_amount + set_amount;
             ticket_counter.mini_amount += mini_amount;
             self.ticket_counter.write((round, picked_number), ticket_counter);
+
+            let sorted_number = self._digits_to_number(self._number_to_sorted_digits(picked_number));
+            let mut ticket_counter = self.ticket_counter.read((round, sorted_number));
+            ticket_counter.box_amount += box_amount + set_amount;
+            self.ticket_counter.write((round, sorted_number), ticket_counter);
 
             self.user_latest_round.write(caller, round);
             let ticket_info = UserTicketInfo { 
@@ -519,17 +523,7 @@ mod FourDraw {
         }
 
         fn _total_box_won(self: @ContractState, round: u256, result_digits: Array<u16>) -> u256 {
-            let mut total_won = 0;
-            let mut i: u16 = 0;
-            while i < 10000 {
-                if result_digits == self._number_to_sorted_digits(i) {
-                    total_won += self.ticket_counter.read((round, i)). box_amount;
-                }
-
-                i += 1
-            };
-
-            total_won
+            self.ticket_counter.read((round, self._digits_to_number(result_digits))).box_amount
         }
 
         fn _total_mini_won(self: @ContractState, round: u256, result_number: u16) -> u256 {

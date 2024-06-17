@@ -1,5 +1,3 @@
-import "../../css/globals.css";
-
 import Image from 'next/image'
 import styles from './Header.module.css'
 import TeaButton from '../TeaButton/TeaButton'

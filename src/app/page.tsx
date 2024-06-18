@@ -13,7 +13,7 @@ export default function Home() {
         <StepContainer>
           <StepTitle step={1} title="Choose your numbers" />
           <StepContentContainer>
-            <HStack gap={8}>
+            <HStack gap={6}>
               <NumberSelectGroup nthNumber={0} />
               <NumberSelectGroup nthNumber={1} />
               <NumberSelectGroup nthNumber={2} />

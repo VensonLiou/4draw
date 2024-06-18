@@ -5,7 +5,7 @@ interface Prop {
   children: ReactNode
 }
 
-const ContentContaner: FC<Prop> = ({ children }) => {
+const ContentContainer: FC<Prop> = ({ children }) => {
   return (
     <div className={styles.contentContainer}>
       {children}
@@ -13,4 +13,4 @@ const ContentContaner: FC<Prop> = ({ children }) => {
   )
 }
 
-export default ContentContaner
+export default ContentContainer

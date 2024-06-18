@@ -1,3 +1,4 @@
+import { useBetTypes } from '@/atoms/betTypes.atom'
 import { usePage } from '@/atoms/page.atom'
 import ButtonGroup from '@/components/ButtonGroup/ButtonGroup'
 import ContentContainer from '@/components/ContentContainer'
@@ -12,8 +13,10 @@ import { Stack } from '@chakra-ui/react'
 
 const ChooseBetTypePage = () => {
   const [, setPage] = usePage()
+  const [betTypes] = useBetTypes()
   const back = () => setPage('choose-number')
-  const toNext = () => setPage('choose-bet-type')
+  const toNext = () => setPage('place-bet')
+  const disableNext = Object.values(betTypes).every(i => !i)
   return (
     <ContentContainer>
       <StepContainer>
@@ -37,6 +40,7 @@ const ChooseBetTypePage = () => {
       </StepContainer>
       <ButtonGroup
         functions={[back, toNext]}
+        disabled={[false, disableNext]}
       />
     </ContentContainer>
   )

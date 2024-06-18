@@ -3,6 +3,7 @@ import { PageName, usePage } from "@/atoms/page.atom";
 import ChooseNumberPage from "@/pages/ChooseNumberPage";
 import { ReactNode } from "react";
 import styles from "./page.module.css";
+import ChooseBetTypePage from "@/pages/ChooseBetTypePage";
 
 export default function Home() {
   const [pageName] = usePage()
@@ -15,9 +16,9 @@ export default function Home() {
 }
 
 const PAGE_MAP: { [page in PageName]: ReactNode } = {
-  "last-round": <ChooseNumberPage />,
-  "choose-number": null,
-  "choose-bet-type": null,
+  "last-round": null,
+  "choose-number": <ChooseNumberPage />,
+  "choose-bet-type": <ChooseBetTypePage />,
   "place-bet": null,
   "bat-placed": null,
   "open-prize": null,

@@ -14,7 +14,7 @@ const NumberSelectGroup: FC<Prop> = ({ nthNumber }) => {
     <div className={styles.container}>
       <Pin nthNumber={nthNumber} />
 
-      <h3>{nthDisplay}{handleOrdinal(nthDisplay)} Number</h3>
+      <h3 style={{ textAlign: 'center' }}>{nthDisplay}{handleOrdinal(nthDisplay)} Number</h3>
 
       <NumberRadialGroup nthNumber={nthNumber} />
     </div>

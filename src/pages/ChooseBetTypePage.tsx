@@ -20,10 +20,12 @@ const ChooseBetTypePage = () => {
         <StepTitle step={2} title="Choose Bet Type & Insert Number of Tickets" />
         <StepContentContainer>
 
-          <Stack>
+          <Stack gap={['40px', null, null, '80px']} direction={['column', null, null, 'row']}>
             <SelectTypeSection />
-            <TypeExplainSection />
-            <FeeSection />
+            <Stack gap={'40px'}>
+              <TypeExplainSection />
+              <FeeSection />
+            </Stack>
           </Stack>
 
           <TotalBetSection />

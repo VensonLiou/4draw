@@ -2,13 +2,14 @@ import { FC, ReactNode } from 'react'
 import styles from './Text.module.css'
 
 interface Prop {
-  children: ReactNode
+  title?: string
+  step: number
 }
 
-const StepTitle: FC<Prop> = ({ children }) => {
+const StepTitle: FC<Prop> = ({ title, step }) => {
   return (
     <h2 className={styles.title}>
-      {children}
+      {step}. {title}
     </h2>
   )
 }

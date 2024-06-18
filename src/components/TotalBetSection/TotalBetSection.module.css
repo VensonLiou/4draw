@@ -1,15 +1,15 @@
 .container {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 500;
-  line-height: 28px;
+  line-height: 24px;
   color: #df4f2f;
   min-width: 280px;
 }
 .total {
-  margin-bottom: 20px;
-  font-size: 20px;
+  margin-bottom: 16px;
+  font-size: 16px;
   font-weight: 700;
-  line-height: 28px;
+  line-height: 24px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -44,7 +44,7 @@
   min-width: 6px;
   background-color: currentColor;
   border-radius: 100px;
-  margin-inline: 16px;
+  margin-inline: 12px;
 }
 @media (max-width:700px) {
   .dot {

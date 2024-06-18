@@ -43,3 +43,10 @@ export const commafy = (num: string | number) => {
   str[0] = str[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return str.join(".");
 }
+
+
+export const CapitalizeFirstLetter = (str: string) => {
+  return str.split(' ').map(w => (
+    Array.from(w.split('')).map((s, idx) => idx === 0 ? s.toUpperCase() : s).join('')
+  )).join(' ')
+}

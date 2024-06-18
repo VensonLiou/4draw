@@ -12,7 +12,8 @@ const ChooseNumberPage = () => {
   const [, setPage] = usePage()
   const toNext = () => setPage('choose-bet-type')
   const [userNumbers] = useUserNumbers()
-  const disableNext = userNumbers.length !== 4 && userNumbers.every(i => i !== undefined)
+  const disableNext = userNumbers.length !== 4 || [...userNumbers].some(i => i === undefined)
+  
   return (
     <ContentContainer>
       <StepContainer>

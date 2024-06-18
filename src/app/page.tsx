@@ -1,27 +1,25 @@
-import NumberSelectGroup from "@/components/NumberSelectGroup/NumberSelectGroup";
-import StepTitle from "@/components/Text/StepTitle";
-import { HStack } from "@chakra-ui/react";
+'use client'
+import { PageName, usePage } from "@/atoms/page.atom";
+import ChooseNumberPage from "@/pages/ChooseNumberPage";
+import { ReactNode } from "react";
 import styles from "./page.module.css";
-import ContentContainer from "@/components/ContentContainer";
-import StepContainer from "@/components/StepContainer";
-import StepContentContainer from "@/components/StepContentContainer";
 
 export default function Home() {
+  const [pageName] = usePage()
+
   return (
     <main className={styles.main}>
-      <ContentContainer>
-        <StepContainer>
-          <StepTitle step={1} title="Choose your numbers" />
-          <StepContentContainer>
-            <HStack gap={6}>
-              <NumberSelectGroup nthNumber={0} />
-              <NumberSelectGroup nthNumber={1} />
-              <NumberSelectGroup nthNumber={2} />
-              <NumberSelectGroup nthNumber={3} />
-            </HStack>
-          </StepContentContainer>
-        </StepContainer>
-      </ContentContainer>
+      {PAGE_MAP[pageName]}
     </main>
   );
+}
+
+const PAGE_MAP: { [page in PageName]: ReactNode } = {
+  "last-round": <ChooseNumberPage />,
+  "choose-number": null,
+  "choose-bet-type": null,
+  "place-bet": null,
+  "bat-placed": null,
+  "open-prize": null,
+  "claim": null,
 }

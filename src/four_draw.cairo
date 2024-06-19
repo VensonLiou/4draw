@@ -58,6 +58,7 @@ pub enum GameStatus {
 #[starknet::interface]
 pub trait IFourDraw<TContractState> {
     fn randomness_contract(self: @TContractState) -> ContractAddress;
+    fn randomness_payment_token(self: @TContractState) -> ContractAddress;
     fn ticket_payment_token(self: @TContractState) -> ContractAddress;
     fn reveal_config(self: @TContractState) -> RevealConfig;
     fn latest_game_round(self: @TContractState) -> u256;
@@ -136,6 +137,7 @@ pub mod FourDraw {
     }
 
     pub mod Errors {
+        pub const INVALID_TICKET_TOKEN: felt252 = 'Invalid ticket token';
         pub const INVALID_GAME_STATUS: felt252 = 'Invalid game status';
         pub const INVALID_TIMESTAMP: felt252 = 'Invalid timestamp';
         pub const CALLER_NOT_RANDOMNESS_CONTRACT: felt252 = 'Caller not randomness contract';
@@ -148,6 +150,7 @@ pub mod FourDraw {
     #[storage]
     struct Storage {
         randomness_contract: ContractAddress,
+        randomness_payment_token: ContractAddress,
         ticket_payment_token: ContractAddress,
         reveal_config: RevealConfig,
         latest_game_round: u256,
@@ -230,7 +233,11 @@ pub mod FourDraw {
     ) {
         self.ownable.initializer(owner);
 
+        let randomness_dispatcher = IRandomnessDispatcher { contract_address: randomness_contract };
+        let randomness_payment_token = randomness_dispatcher.get_payment_token();
+        assert(randomness_payment_token != ticket_payment_token, Errors::INVALID_TICKET_TOKEN);
         self.randomness_contract.write(randomness_contract);
+        self.randomness_payment_token.write(randomness_payment_token);
         self.ticket_payment_token.write(ticket_payment_token);
         self.reveal_config.write(reveal_config);
     }
@@ -239,6 +246,10 @@ pub mod FourDraw {
     impl FourDrawImpl of super::IFourDraw<ContractState> {
         fn randomness_contract(self: @ContractState) -> ContractAddress {
             self.randomness_contract.read()
+        }
+
+        fn randomness_payment_token(self: @ContractState) -> ContractAddress {
+            self.randomness_payment_token.read()
         }
 
         fn ticket_payment_token(self: @ContractState) -> ContractAddress {
@@ -329,7 +340,7 @@ pub mod FourDraw {
             assert(game_info.end_time <= get_block_timestamp(), Errors::INVALID_TIMESTAMP);
 
             let reveal_config = self.reveal_config.read();
-            IERC20Dispatcher { contract_address: self.ticket_payment_token.read() }.approve(
+            IERC20Dispatcher { contract_address: self.randomness_payment_token.read() }.approve(
                 self.randomness_contract.read(),
                 reveal_config.max_fee
             );

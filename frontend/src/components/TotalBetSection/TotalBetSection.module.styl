@@ -1,0 +1,32 @@
+@import '../../css/mixins.styl'
+@import '../../css/variables.styl'
+
+.container
+  Body(500)
+  color Warning
+  min-width 280px
+
+.total
+  margin-bottom 16px
+  Body(700)
+  flexbox(row, space-between, center, 16px)
+
+.betTypeList
+  flexbox(column, flex-start, flex-start, 8px)
+
+.betType
+  width 100%
+  flexbox(row, space-between, center, 16px)
+.row
+  flexbox(row, space-between, center)
+
+.dot
+  height 6px
+  width 6px
+  min-width 6px
+  background-color currentColor
+  border-radius 100px
+  margin-inline 12px
+  @media ({mobileL}) {
+    margin-inline 8px
+  }

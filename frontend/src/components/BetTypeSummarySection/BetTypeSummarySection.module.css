@@ -1,0 +1,27 @@
+.betTypeList {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 28px;
+  color: #df4f2f;
+  min-width: 180px;
+}
+.betType {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0;
+}

@@ -1,0 +1,18 @@
+@import '../css/mixins.styl'
+@import '../css/variables.styl'
+
+.contentContainer
+  flexbox(column, flex-start, flex-start, 40px)
+
+.stepContainer
+  flexbox(column, flex-start, flex-start, 20px)
+
+.stepContentContainer
+  flexbox(column, flex-start, flex-start, 40px)
+  padding-left 32px
+  @media ({mobileL} )
+    padding-left 8px
+
+.networkButton
+  @media ({mobileL} )
+    display none

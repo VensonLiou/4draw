@@ -1,0 +1,42 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 28px;
+  cursor: pointer;
+  user-select: none;
+  background-color: #6558f5;
+  color: #f1f1f1;
+  padding-inline: 24px;
+  height: 40px;
+  border-radius: 8px;
+  transition: transform 0.2s, opacity 0.2s;
+  min-width: 160px;
+}
+.container:not(.container:disabled):hover {
+  transform: scale(1.02);
+}
+.container:not(.container:disabled):active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+.container:not(.secondary).outlined {
+  background-color: transparent;
+  border: 2px solid #6558f5;
+  color: #6558f5;
+}
+.container.secondary {
+  background-color: #2c88d9;
+}
+.container.secondary.outlined {
+  background-color: transparent;
+  border: 2px solid #2c88d9;
+  color: #2c88d9;
+}
+.container:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

@@ -1,0 +1,53 @@
+.container {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #df4f2f;
+  min-width: 280px;
+}
+.total {
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.betTypeList {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+}
+.betType {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0;
+}
+.dot {
+  height: 6px;
+  width: 6px;
+  min-width: 6px;
+  background-color: currentColor;
+  border-radius: 100px;
+  margin-inline: 12px;
+}
+@media (max-width:700px) {
+  .dot {
+    margin-inline: 8px;
+  }
+}

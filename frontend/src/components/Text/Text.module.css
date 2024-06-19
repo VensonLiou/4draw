@@ -10,3 +10,16 @@
     line-height: 28px;
   }
 }
+.yourNumber_title {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+}
+.number {
+  color: #6558f5;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+  vertical-align: middle;
+  margin-left: 8px;
+}

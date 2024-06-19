@@ -1,18 +1,22 @@
-import React from 'react'
-import styles from './FeeSection.module.css'
-import Image from 'next/image'
-import { HStack, Stack } from '@chakra-ui/react'
-import { roundString } from '@/utils/utils'
 import { BetType, useBetTypes } from '@/atoms/betTypes.atom'
+import { roundString } from '@/utils/utils'
+import { HStack, Stack } from '@chakra-ui/react'
+import Image from 'next/image'
+import styles from './FeeSection.module.css'
+import { FC } from 'react'
 
-const FeeSection = () => {
+interface Prop {
+  showDetail?: boolean
+}
+
+const FeeSection: FC<Prop> = ({ showDetail }) => {
   const [betTypes] = useBetTypes()
-  
+
   const entries = Object.entries(betTypes)
   const fee = entries.reduce((prev, currentEntry) => {
     const [key, value] = currentEntry as [BetType, number]
     if (key === 'set') return prev + (2 * (value ?? 0))
-    return prev + (value * 1)
+    return prev + ((value ?? 0) * 1)
   }, 0)
 
   return (
@@ -31,10 +35,10 @@ const FeeSection = () => {
           </HStack>
         </HStack>
 
-        <p>
+        {showDetail && <p>
           1 USDC for Straight, Box, and Mini types.<br />
           2 USDC for Set type.
-        </p>
+        </p>}
       </Stack>
     </section>
   )

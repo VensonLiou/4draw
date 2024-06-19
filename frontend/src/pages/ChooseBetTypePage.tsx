@@ -7,18 +7,25 @@ import SelectTypeSection from '@/components/SelectTypeSection/SelectTypeSection'
 import StepContainer from '@/components/StepContainer'
 import StepContentContainer from '@/components/StepContentContainer'
 import StepTitle from '@/components/Text/StepTitle'
+import YourNumber from '@/components/Text/YourNumber'
 import TotalBetSection from '@/components/TotalBetSection/TotalBetSection'
 import TypeExplainSection from '@/components/TypeExplainSection/TypeExplainSection'
+import { betTypesInvalid } from '@/utils/stateCheck'
 import { Stack } from '@chakra-ui/react'
 
 const ChooseBetTypePage = () => {
+
   const [, setPage] = usePage()
   const [betTypes] = useBetTypes()
+
   const back = () => setPage('choose-number')
   const toNext = () => setPage('place-bet')
-  const disableNext = Object.values(betTypes).every(i => !i)
+
+  const disableNext = betTypesInvalid(betTypes)
+
   return (
     <ContentContainer>
+      <YourNumber />
       <StepContainer>
         <StepTitle step={2} title="Choose Bet Type & Insert Number of Tickets" />
         <StepContentContainer>
@@ -30,7 +37,7 @@ const ChooseBetTypePage = () => {
             <SelectTypeSection />
             <Stack gap={'40px'}>
               <TypeExplainSection />
-              <FeeSection />
+              <FeeSection showDetail />
             </Stack>
           </Stack>
 

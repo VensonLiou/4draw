@@ -1,17 +1,14 @@
-import React, { FC } from 'react'
-import styles from './SelectTypeSection.module.css'
 import { BetType, useBetTypes } from '@/atoms/betTypes.atom'
-import { HStack, NumberInput, NumberInputField, PinInput, PinInputField, Stack } from '@chakra-ui/react'
 import { CapitalizeFirstLetter } from '@/utils/utils'
+import { HStack, NumberInput, NumberInputField, Stack } from '@chakra-ui/react'
+import { FC } from 'react'
+import styles from './SelectTypeSection.module.css'
 
 const SelectTypeSection = () => {
   const [betTypes, setBetTypes] = useBetTypes()
 
   const onChange = (newValue: string, type: BetType) => {
-    console.log(newValue)
     const newNumber = Number(newValue)
-    console.log(newNumber)
-    console.log(newNumber % 10)
     let num: undefined | number
     if (newValue === '') num = undefined
     else if (newNumber > 99) num = newNumber % 100
@@ -19,7 +16,6 @@ const SelectTypeSection = () => {
     else num = newNumber
     const newTypes = { ...betTypes }
     newTypes[type] = num
-    console.log(newTypes)
     setBetTypes(newTypes)
   }
 
@@ -51,7 +47,7 @@ const TypeAmountInput: FC<Prop> = ({ type, value, onChange }) => {
       <HStack gap={4}>
         <NumberInput focusBorderColor='p.600' value={value === undefined ? '' : String(value)} >
           <NumberInputField
-          textAlign={'end'}
+            textAlign={'center'}
             color={'p.600'}
             borderColor={'p.600'}
             fontSize={28}

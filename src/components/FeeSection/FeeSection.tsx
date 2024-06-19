@@ -1,18 +1,17 @@
-import React from 'react'
-import styles from './FeeSection.module.css'
-import Image from 'next/image'
-import { HStack, Stack } from '@chakra-ui/react'
-import { roundString } from '@/utils/utils'
 import { BetType, useBetTypes } from '@/atoms/betTypes.atom'
+import { roundString } from '@/utils/utils'
+import { HStack, Stack } from '@chakra-ui/react'
+import Image from 'next/image'
+import styles from './FeeSection.module.css'
 
 const FeeSection = () => {
   const [betTypes] = useBetTypes()
-  
+
   const entries = Object.entries(betTypes)
   const fee = entries.reduce((prev, currentEntry) => {
     const [key, value] = currentEntry as [BetType, number]
     if (key === 'set') return prev + (2 * (value ?? 0))
-    return prev + (value * 1)
+    return prev + ((value ?? 0) * 1)
   }, 0)
 
   return (

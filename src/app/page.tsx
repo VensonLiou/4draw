@@ -1,5 +1,6 @@
 'use client'
 import { PageName, usePage } from "@/atoms/page.atom";
+import BetPlacedPage from "@/pages/BetPlacedPage";
 import ChooseBetTypePage from "@/pages/ChooseBetTypePage";
 import ChooseNumberPage from "@/pages/ChooseNumberPage";
 import PlaceBetPage from "@/pages/PlaceBetPage";
@@ -21,7 +22,7 @@ const PAGE_MAP: { [page in PageName]: ReactNode } = {
   "choose-number": <ChooseNumberPage />,
   "choose-bet-type": <ChooseBetTypePage />,
   "place-bet": <PlaceBetPage />,
-  "bet-placed": null,
+  "bet-placed": <BetPlacedPage />,
   "open-prize": null,
   "claim": null,
 }

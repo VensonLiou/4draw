@@ -10,9 +10,10 @@ interface Prop {
   disabled?: boolean
   isLoading?: boolean
   onClick?: () => void
+  minWidth?: number
 }
 
-const TeaButton: FC<Prop> = ({ title, secondary, outlined, disabled, isLoading, onClick }) => {
+const TeaButton: FC<Prop> = ({ title, secondary, outlined, disabled, isLoading, onClick, minWidth }) => {
   const loadingColor = !outlined
     ? '#f1f1f1'
     : secondary
@@ -27,6 +28,7 @@ const TeaButton: FC<Prop> = ({ title, secondary, outlined, disabled, isLoading, 
         + (secondary ? styles.secondary : '') + ' '
         + (outlined ? styles.outlined : '')
       }
+      style={{ minWidth }}
     >
       {isLoading
         ? <Loading

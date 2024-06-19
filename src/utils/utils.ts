@@ -50,3 +50,13 @@ export const CapitalizeFirstLetter = (str: string) => {
     Array.from(w.split('')).map((s, idx) => idx === 0 ? s.toUpperCase() : s).join('')
   )).join(' ')
 }
+
+
+export const getCroppedStringIfAddress = (str?: string, charRemained: number = 4): string => {
+  if (!str) return ''
+  const isAddress = str.length >= 42 && str.slice(0, 2) === '0x'
+  if (!isAddress) return str
+  const head = str.substring(0, charRemained)
+  const tail = str.slice(-1 * charRemained)
+  return head + '...' + tail
+}

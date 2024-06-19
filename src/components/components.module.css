@@ -25,3 +25,8 @@
     padding-left: 8px;
   }
 }
+@media (max-width:700px) {
+  .networkButton {
+    display: none;
+  }
+}

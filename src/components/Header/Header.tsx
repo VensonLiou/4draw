@@ -1,6 +1,6 @@
 import Image from 'next/image'
+import ConnectButton from '../ConnectButton'
 import styles from './Header.module.css'
-import TeaButton from '../TeaButton/TeaButton'
 
 const Header = () => {
   return (
@@ -11,10 +11,7 @@ const Header = () => {
         width={172}
         height={42}
       />
-
-      <TeaButton 
-        title='Connect Wallet'
-      />
+      <ConnectButton />
     </header>
   )
 }

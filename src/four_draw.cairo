@@ -135,13 +135,13 @@ pub mod FourDraw {
     }
 
     pub mod Errors {
-        pub const INVALID_GAME_STATUS: felt252 = 'invalid game status';
-        pub const INVALID_TIMESTAMP: felt252 = 'invalid timestamp';
-        pub const CALLER_NOT_RANDOMNESS_CONTRACT: felt252 = 'caller not randomness contract';
-        pub const FULFILLMENT_DELAY_TOO_SHORT: felt252 = 'fulfillment delay too short';
-        pub const INVALID_NUMBER: felt252 = 'invalid number';
-        pub const ALREADY_PICKED: felt252 = 'already picked';
-        pub const INVALID_AMOUNT: felt252 = 'invalid amount';
+        pub const INVALID_GAME_STATUS: felt252 = 'Invalid game status';
+        pub const INVALID_TIMESTAMP: felt252 = 'Invalid timestamp';
+        pub const CALLER_NOT_RANDOMNESS_CONTRACT: felt252 = 'Caller not randomness contract';
+        pub const FULFILLMENT_DELAY_TOO_SHORT: felt252 = 'Fulfillment delay too short';
+        pub const INVALID_NUMBER: felt252 = 'Invalid number';
+        pub const ALREADY_PICKED: felt252 = 'Already picked';
+        pub const INVALID_AMOUNT: felt252 = 'Invalid amount';
     }
 
     #[storage]

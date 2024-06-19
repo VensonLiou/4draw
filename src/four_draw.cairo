@@ -408,7 +408,7 @@ pub mod FourDraw {
             assert(game_info.game_status == GameStatus::Started, Errors::INVALID_GAME_STATUS);
             assert(game_info.end_time > get_block_timestamp(), Errors::INVALID_TIMESTAMP);
             let caller = get_caller_address();
-            assert(self.user_latest_round.read(caller) == round, Errors::ALREADY_PICKED);
+            assert(self.user_latest_round.read(caller) != round, Errors::ALREADY_PICKED);
 
             self._claim_prize(caller);
             let straight_cost = game_info.ticket_price * (straight_amount + set_amount);

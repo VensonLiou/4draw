@@ -1,7 +1,7 @@
 use starknet::ContractAddress;
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
-struct GameInfo {
+pub struct GameInfo {
     ticket_price: u256,
     end_time: u64,
     randomness_request_id: u64,
@@ -13,7 +13,7 @@ struct GameInfo {
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
-struct PrizeInfo {
+pub struct PrizeInfo {
     total_straight_won: u256,
     total_box_won: u256,
     total_mini_won: u256,
@@ -23,7 +23,7 @@ struct PrizeInfo {
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
-struct UserTicketInfo {
+pub struct UserTicketInfo {
     picked_number: u16,
     claimed: bool,
     straight_amount: u256,
@@ -33,14 +33,14 @@ struct UserTicketInfo {
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
-struct TicketCounter {
+pub struct TicketCounter {
     straight_amount: u256,
     box_amount: u256,
     mini_amount: u256
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
-struct RevealConfig {
+pub struct RevealConfig {
     max_fee: u256,
     callback_fee_limit: u128,
     publish_delay: u64,

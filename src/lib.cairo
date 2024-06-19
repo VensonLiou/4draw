@@ -1,2 +1,2 @@
-mod four_draw;
-mod randomness;
+pub mod four_draw;
+pub mod randomness;

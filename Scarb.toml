@@ -11,11 +11,11 @@ openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", ta
 alexandria_sorting = { git = "https://github.com/keep-starknet-strange/alexandria.git", commit = "3041887" }
 
 [dev-dependencies]
-snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.24.0" }
+snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.25.0" }
 
 [[target.starknet-contract]]
 sierra = true
-build-external-contracts = ["openzeppelin::presets::erc20::ERC20"]
+build-external-contracts = ["openzeppelin::presets::erc20::ERC20Upgradeable"]
 
 [scripts]
 test = "snforge test"

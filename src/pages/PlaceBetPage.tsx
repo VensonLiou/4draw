@@ -10,9 +10,10 @@ import StepContentContainer from '@/components/StepContentContainer'
 import StepTitle from '@/components/Text/StepTitle'
 import YourNumber from '@/components/Text/YourNumber'
 import { betTypesInvalid, userNumbersInvalid } from '@/utils/stateCheck'
+import { useAccount } from '@starknet-react/core'
 
 const PlaceBetPage = () => {
-
+  const { address: userAddress } = useAccount()
   const [, setPage] = usePage()
   const [userNumbers] = useUserNumbers()
   const [betTypes] = useBetTypes()
@@ -20,7 +21,7 @@ const PlaceBetPage = () => {
   const back = () => setPage('choose-bet-type')
   const toNext = () => setPage('bet-placed')
 
-  const disableNext = userNumbersInvalid(userNumbers) || betTypesInvalid(betTypes)
+  const disableNext = userNumbersInvalid(userNumbers) || betTypesInvalid(betTypes) || !userAddress
 
   return (
     <ContentContainer>

@@ -111,7 +111,7 @@ mod FourDraw {
         token::erc20::interface::{ IERC20Dispatcher, IERC20DispatcherTrait }
     };
     use alexandria_sorting::MergeSort;
-    use four_draw::randomness:: { IRandomnessDispatcher, IRandomnessDispatcherTrait };
+    use four_draw::randomness::{ IRandomnessDispatcher, IRandomnessDispatcherTrait };
 
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -224,8 +224,11 @@ mod FourDraw {
         ref self: ContractState,
         randomness_contract: ContractAddress,
         ticket_payment_token: ContractAddress,
-        reveal_config: RevealConfig
+        reveal_config: RevealConfig,
+        owner: ContractAddress
     ) {
+        self.ownable.initializer(owner);
+
         self.randomness_contract.write(randomness_contract);
         self.ticket_payment_token.write(ticket_payment_token);
         self.reveal_config.write(reveal_config);

@@ -45,14 +45,19 @@ pub fn deploy_randomness(payment_token: ContractAddress, fixed_fee: u256) -> Con
 
 pub fn deploy_four_draw(
     randomness_contract: ContractAddress,
-    ticket_payment_token: ContractAddress,
-    reveal_config: RevealConfig
+    ticket_payment_token: ContractAddress
 ) -> ContractAddress {
     let contract = declare("FourDraw").unwrap();
+    let reveal_config = RevealConfig {
+        max_fee: 1,
+        callback_fee_limit: 1,
+        publish_delay: 10
+    }
     let mut constructor_calldata = Default::default();
     Serde::serialize(@randomness_contract, ref constructor_calldata);
     Serde::serialize(@ticket_payment_token, ref constructor_calldata);
     Serde::serialize(@reveal_config, ref constructor_calldata);
+    Serde::serialize(@owner(), ref constructor_calldata);
     let (contract_address, _) = contract.deploy(@constructor_calldata).unwrap();
 
     contract_address

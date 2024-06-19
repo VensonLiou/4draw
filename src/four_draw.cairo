@@ -48,6 +48,7 @@ pub struct RevealConfig {
 
 #[derive(PartialEq, Copy, Drop, Serde, starknet::Store)]
 pub enum GameStatus {
+    #[default]
     NotStarted,
     Started,
     Revealing,

@@ -5,6 +5,7 @@ body {
 
 body {
   padding-inline: 20px;
+  min-height: 100vh;
   font-size: 16px;
   font-weight: 500;
   font-family: "Inter";
@@ -12,7 +13,7 @@ body {
 }
 
 @media (max-width:700px) {
-  body{
+  body {
     padding-inline: 8px;
   }
 }

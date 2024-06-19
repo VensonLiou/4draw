@@ -36,7 +36,7 @@ const ChooseBetTypePage = () => {
             <SelectTypeSection />
             <Stack gap={'40px'}>
               <TypeExplainSection />
-              <FeeSection />
+              <FeeSection showDetail/>
             </Stack>
           </Stack>
 

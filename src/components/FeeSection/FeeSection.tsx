@@ -3,8 +3,13 @@ import { roundString } from '@/utils/utils'
 import { HStack, Stack } from '@chakra-ui/react'
 import Image from 'next/image'
 import styles from './FeeSection.module.css'
+import { FC } from 'react'
 
-const FeeSection = () => {
+interface Prop {
+  showDetail?: boolean
+}
+
+const FeeSection: FC<Prop> = ({ showDetail }) => {
   const [betTypes] = useBetTypes()
 
   const entries = Object.entries(betTypes)
@@ -30,10 +35,10 @@ const FeeSection = () => {
           </HStack>
         </HStack>
 
-        <p>
+        {showDetail && <p>
           1 USDC for Straight, Box, and Mini types.<br />
           2 USDC for Set type.
-        </p>
+        </p>}
       </Stack>
     </section>
   )

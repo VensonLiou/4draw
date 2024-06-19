@@ -13,7 +13,8 @@ const PlaceBetPage = () => {
   const [, setPage] = usePage()
   const [userNumbers] = useUserNumbers()
 
-  const toNext = () => setPage('choose-bet-type')
+  const back = () => setPage('choose-bet-type')
+  const toNext = () => setPage('bet-placed')
 
   const disableNext = userNumbers.length !== 4 || [...userNumbers].some(i => i === undefined)
 

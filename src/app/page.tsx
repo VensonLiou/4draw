@@ -21,7 +21,7 @@ const PAGE_MAP: { [page in PageName]: ReactNode } = {
   "choose-number": <ChooseNumberPage />,
   "choose-bet-type": <ChooseBetTypePage />,
   "place-bet": <PlaceBetPage />,
-  "bat-placed": null,
+  "bet-placed": null,
   "open-prize": null,
   "claim": null,
 }

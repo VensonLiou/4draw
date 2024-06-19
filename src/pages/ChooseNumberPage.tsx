@@ -6,14 +6,15 @@ import NumberSelectGroup from '@/components/NumberSelectGroup/NumberSelectGroup'
 import StepContainer from '@/components/StepContainer'
 import StepContentContainer from '@/components/StepContentContainer'
 import StepTitle from '@/components/Text/StepTitle'
+import { userNumbersInvalid } from '@/utils/stateCheck'
 import { HStack } from '@chakra-ui/react'
 
 const ChooseNumberPage = () => {
   const [, setPage] = usePage()
   const toNext = () => setPage('choose-bet-type')
   const [userNumbers] = useUserNumbers()
-  const disableNext = userNumbers.length !== 4 || [...userNumbers].some(i => i === undefined)
-  
+  const disableNext = userNumbersInvalid(userNumbers)
+
   return (
     <ContentContainer>
       <StepContainer>

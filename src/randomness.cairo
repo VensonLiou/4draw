@@ -2,6 +2,7 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait IRandomness<TContractState> {
+    fn payment_token(self: @TContractState) -> ContractAddress;
     fn request_random(
         ref self: TContractState,
         seed: u64,
@@ -51,6 +52,10 @@ mod Randomness {
 
     #[abi(embed_v0)]
     impl IRandomnessImpl of super::IRandomness<ContractState> {
+        fn payment_token(self: @ContractState) -> ContractAddress {
+            self.payment_token.read()
+        }
+
         fn request_random(
             ref self: ContractState,
             seed: u64,

@@ -2,52 +2,52 @@ use starknet::ContractAddress;
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct GameInfo {
-    ticket_price: u256,
-    end_time: u64,
-    randomness_request_id: u64,
-    result_number: u16,
-    game_status: GameStatus,
-    total_straight_prize_accumulated: u256,
-    total_box_prize_accumulated: u256,
-    total_mini_prize_accumulated: u256
+    pub ticket_price: u256,
+    pub end_time: u64,
+    pub randomness_request_id: u64,
+    pub result_number: u16,
+    pub game_status: GameStatus,
+    pub total_straight_prize_accumulated: u256,
+    pub total_box_prize_accumulated: u256,
+    pub total_mini_prize_accumulated: u256
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct PrizeInfo {
-    total_straight_won: u256,
-    total_box_won: u256,
-    total_mini_won: u256,
-    single_straight_prize: u256,
-    single_box_prize: u256,
-    single_mini_prize: u256
+    pub total_straight_won: u256,
+    pub total_box_won: u256,
+    pub total_mini_won: u256,
+    pub single_straight_prize: u256,
+    pub single_box_prize: u256,
+    pub single_mini_prize: u256
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct UserTicketInfo {
-    picked_number: u16,
-    claimed: bool,
-    straight_amount: u256,
-    box_amount: u256,
-    set_amount: u256,
-    mini_amount: u256
+    pub picked_number: u16,
+    pub claimed: bool,
+    pub straight_amount: u256,
+    pub box_amount: u256,
+    pub set_amount: u256,
+    pub mini_amount: u256
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct TicketCounter {
-    straight_amount: u256,
-    box_amount: u256,
-    mini_amount: u256
+    pub straight_amount: u256,
+    pub box_amount: u256,
+    pub mini_amount: u256
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct RevealConfig {
-    max_fee: u256,
-    callback_fee_limit: u128,
-    publish_delay: u64,
+    pub max_fee: u256,
+    pub callback_fee_limit: u128,
+    pub publish_delay: u64,
 }
 
 #[derive(PartialEq, Copy, Drop, Serde, starknet::Store)]
-enum GameStatus {
+pub enum GameStatus {
     NotStarted,
     Started,
     Revealing,
@@ -65,7 +65,7 @@ pub trait IFourDraw<TContractState> {
     fn user_latest_round(self: @TContractState, account: ContractAddress) -> u256;
     fn user_tickets(self: @TContractState, account: ContractAddress, round: u256) -> UserTicketInfo;
     fn latest_tickets_result(self: @TContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256);
-    fn setRevealConfig(ref self: TContractState, reveal_config: RevealConfig);
+    fn set_reveal_config(ref self: TContractState, reveal_config: RevealConfig);
     fn start_new_game(ref self: TContractState, ticket_price: u256, end_time: u64);
     fn request_reveal_result(ref self: TContractState, seed: u64);
     fn receive_random_words(
@@ -87,7 +87,7 @@ pub trait IFourDraw<TContractState> {
 }
 
 #[starknet::contract]
-mod FourDraw {
+pub mod FourDraw {
     use super::{
         GameInfo,
         PrizeInfo,
@@ -134,7 +134,7 @@ mod FourDraw {
         }
     }
 
-    mod Errors {
+    pub mod Errors {
         pub const INVALID_GAME_STATUS: felt252 = 'invalid game status';
         pub const INVALID_TIMESTAMP: felt252 = 'invalid timestamp';
         pub const CALLER_NOT_RANDOMNESS_CONTRACT: felt252 = 'caller not randomness contract';
@@ -272,7 +272,7 @@ mod FourDraw {
             self._latest_tickets_result(account)
         }
 
-        fn setRevealConfig(ref self: ContractState, reveal_config: RevealConfig) {
+        fn set_reveal_config(ref self: ContractState, reveal_config: RevealConfig) {
             self.ownable.assert_only_owner();
 
             self.reveal_config.write(reveal_config);

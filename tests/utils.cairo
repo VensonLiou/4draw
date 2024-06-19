@@ -21,16 +21,21 @@ pub fn invalid() -> ContractAddress {
     contract_address_const::<'INVALID'>()
 }
 
-pub fn deploy_token(name: ByteArray, symbol: ByteArray, initial_supply: u256, recipient: ContractAddress) -> ContractAddress {
+pub fn deploy_two_tokens(initial_supply: u256) -> (ContractAddress, ContractAddress) {
+    let owner = owner();
     let contract = declare("ERC20Upgradeable").unwrap();
+    let name: ByteArray = "Token";
+    let symbol: ByteArray = "TKN";
     let mut constructor_calldata = Default::default();
     Serde::serialize(@name, ref constructor_calldata);
     Serde::serialize(@symbol, ref constructor_calldata);
     Serde::serialize(@initial_supply, ref constructor_calldata);
-    Serde::serialize(@recipient, ref constructor_calldata);
-    let (contract_address, _) = contract.deploy(@constructor_calldata).unwrap();
+    Serde::serialize(@owner, ref constructor_calldata);
+    Serde::serialize(@owner, ref constructor_calldata);
+    let (token0, _) = contract.deploy(@constructor_calldata).unwrap();
+    let (token1, _) = contract.deploy(@constructor_calldata).unwrap();
 
-    contract_address
+    (token0, token1)
 }
 
 pub fn deploy_randomness(payment_token: ContractAddress, fixed_fee: u256) -> ContractAddress {
@@ -52,7 +57,7 @@ pub fn deploy_four_draw(
         max_fee: 1,
         callback_fee_limit: 1,
         publish_delay: 10
-    }
+    };
     let mut constructor_calldata = Default::default();
     Serde::serialize(@randomness_contract, ref constructor_calldata);
     Serde::serialize(@ticket_payment_token, ref constructor_calldata);

@@ -2,7 +2,7 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait IRandomness<TContractState> {
-    fn payment_token(self: @TContractState) -> ContractAddress;
+    fn get_payment_token(self: @TContractState) -> ContractAddress;
     fn request_random(
         ref self: TContractState,
         seed: u64,
@@ -52,7 +52,7 @@ mod Randomness {
 
     #[abi(embed_v0)]
     impl IRandomnessImpl of super::IRandomness<ContractState> {
-        fn payment_token(self: @ContractState) -> ContractAddress {
+        fn get_payment_token(self: @ContractState) -> ContractAddress {
             self.payment_token.read()
         }
 
@@ -66,8 +66,8 @@ mod Randomness {
             calldata: Array<felt252>
         ) -> u64 {
             let caller_address = get_caller_address();
-            let request_id = self.request_id.read(caller_address);
-            self.request_id.write(caller_address, request_id + 1);
+            let request_id = self.request_id.read(caller_address) + 1;
+            self.request_id.write(caller_address, request_id);
             self.min_block.write(request_id, get_block_number() + publish_delay);
             let token_dispatcher = IERC20Dispatcher { contract_address: self.payment_token.read() };
             token_dispatcher.transfer_from(caller_address, get_contract_address(), self.fixed_fee.read());

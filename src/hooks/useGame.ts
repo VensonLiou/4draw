@@ -1,7 +1,7 @@
 import ABI from '@/configs/ABI';
 import { useAccount, useContract } from '@starknet-react/core';
 import toast from 'react-hot-toast';
-import { AccountInterface, Contract } from 'starknet';
+import { AccountInterface, Contract, TransactionType } from 'starknet';
 
 const useGame = () => {
   const { account } = useAccount()
@@ -36,6 +36,7 @@ const useGame = () => {
   }
 
 
+
   const claimPrize = async () => {
     await checkRunWait({
       account,
@@ -64,6 +65,21 @@ type Prop = {
 const checkRunWait = async ({ contract, account, functionName, args }: Prop) => {
   if (!contract || !account) return toast.error('contract not ready.')
   if (!args) args = []
+
+  // staticCall 
+  const { calldata } = contract.populate(functionName, args)
+  const staticCallResult = await account?.simulateTransaction(
+    [{
+      type: TransactionType.INVOKE,
+      calldata,
+      entrypoint: functionName,
+      contractAddress: contract.address,
+    }],
+    { skipValidate: true }
+  )
+  console.log({ staticCallResult })
+
+
   const res = await contract[functionName](...args)
   await account?.waitForTransaction(res.transaction_hash)
 }

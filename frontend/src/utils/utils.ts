@@ -60,3 +60,13 @@ export const getCroppedStringIfAddress = (str?: string, charRemained: number = 4
   const tail = str.slice(-1 * charRemained)
   return head + '...' + tail
 }
+
+export const bigintishToArray = (n?: number | bigint | string) => {
+  if (n === undefined) return
+
+  const arr = Array.from(String(n), Number)
+  while (arr.length < 4) {
+    arr.unshift(0)
+  }
+  return arr
+}

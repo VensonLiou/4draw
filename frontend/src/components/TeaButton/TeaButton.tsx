@@ -30,13 +30,14 @@ const TeaButton: FC<Prop> = ({ title, secondary, outlined, disabled, isLoading, 
       }
       style={{ minWidth }}
     >
-      {isLoading
-        ? <Loading
+      <p style={{ opacity: isLoading ? 0 : 1 }}>{title}</p>
+      {isLoading &&
+        <Loading
           type='spinningBubbles'
           width={28} height={28}
           color={loadingColor}
-        />
-        : title}
+          className={styles.loading}
+        />}
     </button>
   )
 }

@@ -1,5 +1,5 @@
-import { mainnet } from "@starknet-react/chains";
-import { StarknetConfig, argent, braavos, publicProvider } from "@starknet-react/core";
+import { sepolia } from "@starknet-react/chains";
+import { StarknetConfig, argent, publicProvider } from "@starknet-react/core";
 import { FC, ReactNode } from 'react';
 
 const provider = publicProvider()
@@ -14,7 +14,7 @@ interface Prop {
 const StarknetProvider: FC<Prop> = ({ children }) => {
   return (
     <StarknetConfig
-      chains={[mainnet]}
+      chains={[sepolia]}
       provider={provider}
       connectors={connectors as any}
       autoConnect={true}

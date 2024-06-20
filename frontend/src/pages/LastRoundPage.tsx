@@ -1,24 +1,54 @@
+import { usePage } from '@/atoms/page.atom'
 import ContentContainer from '@/components/ContentContainer'
+import ResultSection from '@/components/ResultSection/ResultSection'
+import TeaButton from '@/components/TeaButton/TeaButton'
+import YourNumber from '@/components/Text/YourNumber'
+import { HStack } from '@chakra-ui/react'
 import { useAccount } from '@starknet-react/core'
-import React from 'react'
+import styles from './pages.module.css'
+import useGameInfo from '@/hooks/useGameInfo'
 
 const LastRoundPage = () => {
   const { address: userAddress } = useAccount()
+  const [, setPageName] = usePage()
+  const { latestGameRound, latestTicketsResult } = useGameInfo()
 
-  // 判斷是否已經開獎
-  const isPrizeRevealed = true
+  const userLatestRound = latestTicketsResult.userLatestRound
 
-  // 未開獎，前往開獎頁面
-  if (!isPrizeRevealed) {
 
-  }
-  else {
-    // 已開獎，前往領獎頁面
+  const userLatestRoundNumber = latestTicketsResult.userTickets.picked_number
+  const userLatestRoundResult = latestTicketsResult.userLatestRoundResult
 
-  }
+  const isWin = Boolean(
+    (userLatestRoundResult && userLatestRoundNumber)
+    && userLatestRoundResult.join('') === userLatestRoundNumber.join('')
+  )
+
+  const isClaimed = latestTicketsResult.userTickets?.claimed
+
+  const prize = latestTicketsResult.unclaimed_prize
+
+
   return (
     <ContentContainer>
-      <p>Last Round</p>
+      <h2 className={styles.title}>
+        The Winning Numbers for Round #{userLatestRound || latestGameRound} are:
+      </h2>
+
+      <HStack gap={8}>
+        {userLatestRoundResult?.map(i => (
+          <span key={i} className={styles.winningNumber}>
+            {i}
+          </span>
+        ))}
+      </HStack>
+      {userAddress && userLatestRoundResult
+        ? <>
+          <YourNumber _userNumbers={userLatestRoundNumber} />
+          <ResultSection isClaimed={isClaimed} isWin={isWin} prize={prize} />
+        </>
+        : <TeaButton title='Place a New Bet' onClick={() => setPageName('choose-number')} />
+      }
     </ContentContainer>
   )
 }

@@ -1,10 +1,10 @@
 import { useUserNumbers } from '@/atoms/userNumbers.atom'
 import styles from './Text.module.css'
 
-const YourNumber = () => {
+const YourNumber = ({ _userNumbers }: { _userNumbers?: (number)[] }) => {
 
   const [userNumbers] = useUserNumbers()
-  const text = userNumbers.join(' ')
+  const text = (_userNumbers ?? userNumbers).join(' ')
 
   return (
     <p className={styles.yourNumber_title}>

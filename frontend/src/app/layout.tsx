@@ -4,7 +4,6 @@ import Header from "@/components/Header/Header";
 import Providers from "@/providers/Providers";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Toaster } from "react-hot-toast";
 import "../css/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,7 +25,6 @@ export default function RootLayout({
         <Providers>
           <Header />
           {children}
-          <Toaster />
         </Providers>
       </body>
     </html>

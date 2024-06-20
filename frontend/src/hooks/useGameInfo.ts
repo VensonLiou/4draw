@@ -15,11 +15,11 @@ const useGameInfo = () => {
 
   const read = useContractRead
   const B = Boolean
-  const { data: data1 } = read({ ...opt, functionName: 'latest_game_round' })
-  const { data: data2 } = read({ ...opt, functionName: 'game_info', args: [String(data1)!], enabled: B(data1) })
-  const { data: data3 } = read({ ...opt, functionName: 'user_latest_round', args: [userAddress!], enabled: B(userAddress) })
-  const { data: data4 } = read({ ...opt, functionName: 'latest_tickets_result', args: [userAddress!], enabled: B(userAddress) })
-  const { data: data5 } = read({ ...opt, functionName: 'game_info', args: [String(data3)!], enabled: B(data3) })
+  const { data: data1, refetch: r1 } = read({ ...opt, functionName: 'latest_game_round' })
+  const { data: data2, refetch: r2 } = read({ ...opt, functionName: 'game_info', args: [String(data1)!], enabled: B(data1) })
+  const { data: data3, refetch: r3 } = read({ ...opt, functionName: 'user_latest_round', args: [userAddress!], enabled: B(userAddress) })
+  const { data: data4, refetch: r4 } = read({ ...opt, functionName: 'latest_tickets_result', args: [userAddress!], enabled: B(userAddress) })
+  const { data: data5, refetch: r5 } = read({ ...opt, functionName: 'game_info', args: [String(data3)!], enabled: B(data3) })
 
   // console.log('/ /// / /// / ///')
   // console.log(['latest_game_round', data1])
@@ -52,6 +52,11 @@ const useGameInfo = () => {
     mini_amount: Number(_userTickets.mini_amount),
   }
 
+  const refetchInfo = async () => {
+    await Promise.all([r1(), r2(), r3(), r4(), r5(),])
+  }
+
+
   return MOCK_GAME_INFO
   // return {
   //   latestGameRound: data1 === undefined ? undefined : Number(data1),
@@ -70,7 +75,8 @@ const useGameInfo = () => {
   //     userTickets,
   //     unclaimed_prize,
   //     userLatestRoundResult: userLatestRoundResult === undefined ? undefined : bigintishToArray(userLatestRoundResult)
-  //   }
+  //   },
+  //   refetchInfo,
   // }
 }
 

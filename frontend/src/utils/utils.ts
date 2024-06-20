@@ -70,3 +70,9 @@ export const bigintishToArray = (n?: number | bigint | string) => {
   }
   return arr
 }
+
+export const sleep = async (ms: number) => {
+  await new Promise(res => setTimeout(() => {
+    res('')
+  }, ms))
+}

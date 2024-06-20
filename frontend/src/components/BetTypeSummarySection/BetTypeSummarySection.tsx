@@ -15,11 +15,6 @@ const BetTypeSummarySection = () => {
       <ul className={styles.betTypeList}>
 
         <li className={styles.betType}>
-          <div className={styles.row}><Dot /> Set:</div>
-          <span>{setBets} </span>
-        </li>
-
-        <li className={styles.betType}>
           <div className={styles.row}><Dot /> Straight:</div>
           <span>{straightBets} </span>
         </li>
@@ -27,6 +22,11 @@ const BetTypeSummarySection = () => {
         <li className={styles.betType}>
           <div className={styles.row}><Dot /> Box:</div>
           <span>{boxBets} </span>
+        </li>
+
+        <li className={styles.betType}>
+          <div className={styles.row}><Dot /> Set:</div>
+          <span>{setBets} </span>
         </li>
 
         <li className={styles.betType}>

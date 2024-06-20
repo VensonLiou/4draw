@@ -1,4 +1,6 @@
 import { usePage } from '@/atoms/page.atom'
+import useGame from '@/hooks/useGame'
+import useGameInfo from '@/hooks/useGameInfo'
 import { asyncWrapper } from '@/utils/asyncWrapper'
 import { formatUnits } from '@/utils/parseUnits'
 import { FC, useState } from 'react'
@@ -14,15 +16,16 @@ interface Prop {
 const ResultSection: FC<Prop> = ({ isWin, isClaimed, prize }) => {
   const [, setPageName] = usePage()
   const [isClaiming, setIsClaiming] = useState(false);
+  const { refetchInfo } = useGameInfo()
+  const { claimPrize } = useGame()
 
   const toChooseNumber = () => setPageName('choose-number')
-  const claimPrize = () => asyncWrapper({
-    name: 'claimPrize',
+  const claim = () => asyncWrapper({
+    name: 'claim',
     shouldToast: true,
     setIsLoading: setIsClaiming,
-    asyncFn: async () => {
-
-    },
+    asyncFn: claimPrize,
+    onSuccess: async () => await refetchInfo()
   })
 
   const disablePlaceAnotherBet = isClaiming
@@ -31,19 +34,26 @@ const ResultSection: FC<Prop> = ({ isWin, isClaimed, prize }) => {
   return (
     <div className={styles.container}>
       {isWin
-        ? <p>
-          Congratulations!<br />
-          You won <span className={styles.prize}>{formatUnits(prize, 18)} USDC!</span>
-        </p>
+        ? isClaimed
+          ? <p> Congratulations! <br />
+            You have claimed your prize.
+          </p >
+          : <p>
+            Congratulations! <br />
+            You won <span className={styles.prize}>{formatUnits(prize, 18)} USDC!</span>
+          </p>
         : <p>Good luck next time!</p>
       }
 
 
       <ButtonGroup
-        titles={['Place Another Bet', isClaimed ? 'Claimed' : 'Claim Prize']}
+        titles={[
+          'Place Another Bet',
+          isClaimed ? 'Claimed' : 'Claim Prize'
+        ]}
         outlined={[true, false]}
-        functions={[toChooseNumber, claimPrize]}
-        isLoading={[isClaiming, isClaiming]}
+        functions={[toChooseNumber, claim]}
+        isLoading={[false, isClaiming]}
         disabled={[disablePlaceAnotherBet, disableClaimPrize]}
       />
     </div>

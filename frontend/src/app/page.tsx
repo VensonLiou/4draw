@@ -9,6 +9,7 @@ import PlaceBetPage from "@/pages/PlaceBetPage";
 import { Spinner } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import styles from "./page.module.css";
+import RevealPage from "@/pages/RevealPage";
 
 export default function Home() {
   const [pageName] = usePage()
@@ -39,7 +40,7 @@ export default function Home() {
     "choose-bet-type": <ChooseBetTypePage />,
     "place-bet": <PlaceBetPage />,
     "bet-placed": <BetPlacedPage />,
-    "open-prize": "open-prize",
+    "open-prize": <RevealPage />,
     "claim": "claim",
   }
 

@@ -6,41 +6,46 @@ import YourNumber from '@/components/Text/YourNumber'
 import { HStack } from '@chakra-ui/react'
 import { useAccount } from '@starknet-react/core'
 import styles from './pages.module.css'
+import useGameInfo from '@/hooks/useGameInfo'
 
 const LastRoundPage = () => {
   const { address: userAddress } = useAccount()
-  const [pageName, setPageName] = usePage()
+  const [, setPageName] = usePage()
+  const { latestGameRound, latestTicketsResult } = useGameInfo()
 
-  // 判斷是否已經開獎
-  const isPrizeRevealed = true
+  const userLatestRound = latestTicketsResult.userLatestRound
 
 
-  const winningNumber = [1, 2, 3, 4] as number[] | undefined
+  const userLatestRoundNumber = latestTicketsResult.userTickets.picked_number
+  const userLatestRoundResult = latestTicketsResult.userLatestRoundResult
 
-  const userLastRoundNumber = [3, 1, 4, 1] as number[] | undefined
-  // const userLastRoundNumber = undefined
+  const isWin = Boolean(
+    (userLatestRoundResult && userLatestRoundNumber)
+    && userLatestRoundResult.join('') === userLatestRoundNumber.join('')
+  )
 
-  const isWin = (winningNumber && userLastRoundNumber)
-    && winningNumber.join('') === userLastRoundNumber.join('')
+  const isClaimed = latestTicketsResult.userTickets?.claimed
+
+  const prize = latestTicketsResult.unclaimed_prize
 
 
   return (
     <ContentContainer>
       <h2 className={styles.title}>
-        The Winning Numbers for Round #123 are:
+        The Winning Numbers for Round #{userLatestRound || latestGameRound} are:
       </h2>
 
       <HStack gap={8}>
-        {winningNumber?.map(i => (
+        {userLatestRoundResult?.map(i => (
           <span key={i} className={styles.winningNumber}>
             {i}
           </span>
         ))}
       </HStack>
-      {userAddress && userLastRoundNumber
+      {userAddress && userLatestRoundResult
         ? <>
-          <YourNumber _userNumbers={userLastRoundNumber} />
-          <ResultSection />
+          <YourNumber _userNumbers={userLatestRoundNumber} />
+          <ResultSection isClaimed={isClaimed} isWin={isWin} prize={prize} />
         </>
         : <TeaButton title='Place a New Bet' onClick={() => setPageName('choose-number')} />
       }

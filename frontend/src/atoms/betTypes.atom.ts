@@ -4,11 +4,11 @@ const betTypes = atom<BetTypes>({});
 
 export const useBetTypes = () => useAtom(betTypes)
 
-export type BetType = 'straight' | 'set' | 'box' | 'mini'
+export type BetType = 'straight' | 'box' | 'set' | 'mini'
 
 export type BetTypes = {
   straight?: number
-  set?: number
   box?: number
+  set?: number
   mini?: number
 }

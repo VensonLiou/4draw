@@ -8,7 +8,7 @@ const useGame = () => {
 
   // prepare contract
   const { contract } = useContract({
-    abi: ABI as any,
+    abi: ABI,
     address: '0x',
   });
 
@@ -36,7 +36,7 @@ const useGame = () => {
   }
 
 
-  const buyTickets = async (picked_number: bigint, straight_amount: bigint, box_amount: bigint, set_amount: bigint, mini_amount: bigint) => {
+  const buyTickets = async (picked_number: string, straight_amount: string, box_amount: string, set_amount: string, mini_amount: string) => {
     await checkRunWait({
       account,
       contract,

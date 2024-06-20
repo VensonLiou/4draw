@@ -23,8 +23,8 @@ const SelectTypeSection = () => {
     <section className={styles.container}>
       <Stack gap={6}>
         <TypeAmountInput type="straight" value={betTypes['straight']} onChange={onChange} />
-        <TypeAmountInput type="set" value={betTypes['set']} onChange={onChange} />
         <TypeAmountInput type="box" value={betTypes['box']} onChange={onChange} />
+        <TypeAmountInput type="set" value={betTypes['set']} onChange={onChange} />
         <TypeAmountInput type="mini" value={betTypes['mini']} onChange={onChange} />
       </Stack>
     </section>

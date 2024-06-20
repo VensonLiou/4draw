@@ -369,13 +369,14 @@ pub mod FourDraw {
             calldata: Array<felt252>
         ) {
             self.reentrancy_guard.start();
+            let (round, mut game_info) = self._get_latest_game();
+            assert(game_info.game_status == GameStatus::Revealing, Errors::INVALID_GAME_STATUS);
             assert(get_caller_address() == self.randomness_contract.read(), Errors::CALLER_NOT_RANDOMNESS_CONTRACT);
             assert(self.min_block_number.read() <= get_block_number(), Errors::FULFILLMENT_DELAY_TOO_SHORT);
 
             let random_number: u16 = ((*random_words.at(0)).into() % 10000_u256).try_into().unwrap();
-            let (round, mut game_info) = self._get_latest_game();
             let total_straight_won = self._total_straight_won(round, random_number);
-            let total_box_won = self._total_box_won(round, self._number_to_sorted_digits(random_number));
+            let total_box_won = self._total_box_won(round, random_number);
             let total_mini_won = self._total_mini_won(round, random_number);
 
             self.prize_info.write(round, PrizeInfo {
@@ -537,8 +538,11 @@ pub mod FourDraw {
             self.ticket_counter.read((round, result_number)).straight_amount
         }
 
-        fn _total_box_won(self: @ContractState, round: u256, result_digits: Array<u16>) -> u256 {
-            self.ticket_counter.read((round, self._digits_to_number(result_digits))).box_amount
+        fn _total_box_won(self: @ContractState, round: u256, result_number: u16) -> u256 {
+            self.ticket_counter.read((
+                round,
+                self._digits_to_number(self._number_to_sorted_digits(result_number))
+            )).box_amount
         }
 
         fn _total_mini_won(self: @ContractState, round: u256, result_number: u16) -> u256 {

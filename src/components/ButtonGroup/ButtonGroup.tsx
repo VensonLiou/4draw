@@ -16,7 +16,7 @@ const ButtonGroup: FC<Prop> = ({ titles, functions, outlined, disabled, isLoadin
   if (!outlined) outlined = [true, false]
 
   return (
-    <HStack className={styles.container} gap={[4, 10]}>
+    <HStack className={styles.container} gap={[4, 10]} flexWrap={'wrap'}>
       {titles?.map((title, idx) => (
         <TeaButton
           key={title}

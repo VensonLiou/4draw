@@ -7,7 +7,7 @@ import { useAccount } from '@starknet-react/core'
 import React, { useState } from 'react'
 
 const RevealPage = () => {
-  const { latestGameRound } = useGameInfo()
+  const { latestGameRound, refetchInfo } = useGameInfo()
   const { address: userAddress } = useAccount()
   const { requestRevealResult } = useGame()
 
@@ -18,6 +18,7 @@ const RevealPage = () => {
     shouldToast: true,
     setIsLoading: setIsRevealing,
     asyncFn: requestRevealResult,
+    onFinish: async () => await refetchInfo()
   })
 
   return (

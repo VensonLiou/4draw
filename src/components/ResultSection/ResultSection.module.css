@@ -1,0 +1,11 @@
+.container {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+}
+.container p {
+  margin-block: 40px;
+}
+.prize {
+  color: #df4f2f;
+}

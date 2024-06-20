@@ -8,3 +8,19 @@
   padding-inline: 8px;
   border-bottom: 1px solid #111;
 }
+.logo {
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  .logo:hover {
+    transition: opacity 0s;
+    opacity: 0.9;
+  }
+}
+.logo:active {
+  transition: opacity 0s;
+  opacity: 0.6;
+}

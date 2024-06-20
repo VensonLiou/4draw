@@ -5,7 +5,6 @@ import { FC, ReactNode } from 'react';
 const provider = publicProvider()
 const connectors = [
   argent(),
-  braavos(),
 ]
 
 interface Prop {

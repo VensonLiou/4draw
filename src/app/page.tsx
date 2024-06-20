@@ -1,15 +1,15 @@
 'use client'
 import { PageName, usePage } from "@/atoms/page.atom";
 import useGameInfo from "@/hooks/useGameInfo";
-import BetPlacedPage from "@/pages/BetPlacedPage";
-import ChooseBetTypePage from "@/pages/ChooseBetTypePage";
-import ChooseNumberPage from "@/pages/ChooseNumberPage";
-import LastRoundPage from "@/pages/LastRoundPage";
-import PlaceBetPage from "@/pages/PlaceBetPage";
+import BetPlacedPage from "@/subpages/BetPlacedPage";
+import ChooseBetTypePage from "@/subpages/ChooseBetTypePage";
+import ChooseNumberPage from "@/subpages/ChooseNumberPage";
+import LastRoundPage from "@/subpages/LastRoundPage";
+import PlaceBetPage from "@/subpages/PlaceBetPage";
 import { Spinner } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import styles from "./page.module.css";
-import RevealPage from "@/pages/RevealPage";
+import RevealPage from "@/subpages/RevealPage";
 
 export default function Home() {
   const [pageName] = usePage()

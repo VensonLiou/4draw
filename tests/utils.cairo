@@ -17,10 +17,6 @@ pub fn user2() -> ContractAddress {
     contract_address_const::<'USER2'>()
 }
 
-pub fn invalid() -> ContractAddress {
-    contract_address_const::<'INVALID'>()
-}
-
 pub fn deploy_two_tokens(initial_supply: u256) -> (ContractAddress, ContractAddress) {
     let owner = owner();
     let contract = declare("ERC20Upgradeable").unwrap();

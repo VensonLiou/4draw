@@ -1,3 +1,4 @@
+'use client'
 import Image from 'next/image'
 import ConnectButton from '../ConnectButton'
 import styles from './Header.module.css'
@@ -10,6 +11,8 @@ const Header = () => {
         src={'/logo-name-light.svg'}
         width={172}
         height={42}
+        onClick={() => window.location.href = '/'}
+        className={styles.logo}
       />
       <ConnectButton />
     </header>

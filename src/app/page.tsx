@@ -6,14 +6,14 @@ import ChooseBetTypePage from "@/subpages/ChooseBetTypePage";
 import ChooseNumberPage from "@/subpages/ChooseNumberPage";
 import LastRoundPage from "@/subpages/LastRoundPage";
 import PlaceBetPage from "@/subpages/PlaceBetPage";
+import RevealPage from "@/subpages/RevealPage";
 import { Spinner } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import styles from "./page.module.css";
-import RevealPage from "@/subpages/RevealPage";
 
 export default function Home() {
   const [pageName] = usePage()
-  const { gameInfo, latestGameRound, latestTicketsResult } = useGameInfo()
+  const { gameInfo, latestGameRound } = useGameInfo()
 
   // 檢查有沒有前一輪
   const isFirstRound = latestGameRound === 1 && gameInfo?.game_status === 'Started'
@@ -41,8 +41,7 @@ export default function Home() {
     "choose-bet-type": <ChooseBetTypePage />,
     "place-bet": <PlaceBetPage />,
     "bet-placed": <BetPlacedPage />,
-    "open-prize": <RevealPage />,
-    "claim": "claim",
+    "open-prize": <RevealPage />
   }
 
 

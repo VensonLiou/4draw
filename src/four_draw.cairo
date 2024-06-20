@@ -63,6 +63,7 @@ pub trait IFourDraw<TContractState> {
     fn reveal_config(self: @TContractState) -> RevealConfig;
     fn latest_game_round(self: @TContractState) -> u256;
     fn game_info(self: @TContractState, round: u256) -> GameInfo;
+    fn prize_info(self: @TContractState, round: u256) -> PrizeInfo;
     fn ticket_counter(self: @TContractState, round: u256, picked_number: u16) -> TicketCounter;
     fn user_latest_round(self: @TContractState, account: ContractAddress) -> u256;
     fn user_tickets(self: @TContractState, account: ContractAddress, round: u256) -> UserTicketInfo;
@@ -145,6 +146,7 @@ pub mod FourDraw {
         pub const INVALID_NUMBER: felt252 = 'Invalid number';
         pub const ALREADY_PICKED: felt252 = 'Already picked';
         pub const INVALID_AMOUNT: felt252 = 'Invalid amount';
+        pub const NO_UNCLAIMED_PRIZE: felt252 = 'No unclaimed prize';
     }
 
     #[storage]
@@ -262,6 +264,10 @@ pub mod FourDraw {
 
         fn latest_game_round(self: @ContractState) -> u256 {
             self.latest_game_round.read()
+        }
+
+        fn prize_info(self: @ContractState, round: u256) -> PrizeInfo {
+            self.prize_info.read(round)
         }
 
         fn game_info(self: @ContractState, round: u256) -> GameInfo {
@@ -462,6 +468,7 @@ pub mod FourDraw {
             self.reentrancy_guard.start();
 
             let claimed_prize = self._claim_prize(get_caller_address());
+            assert(claimed_prize != 0, Errors::NO_UNCLAIMED_PRIZE);
 
             self.reentrancy_guard.end();
             claimed_prize

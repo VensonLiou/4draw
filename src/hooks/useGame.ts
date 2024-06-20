@@ -40,7 +40,7 @@ const useGame = () => {
     await checkRunWait({
       account,
       contract,
-      functionName: 'claimPrize'
+      functionName: 'claim_prize'
     })
   }
 

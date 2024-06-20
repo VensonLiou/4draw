@@ -3,6 +3,7 @@ import { PageName, usePage } from "@/atoms/page.atom";
 import BetPlacedPage from "@/pages/BetPlacedPage";
 import ChooseBetTypePage from "@/pages/ChooseBetTypePage";
 import ChooseNumberPage from "@/pages/ChooseNumberPage";
+import LastRoundPage from "@/pages/LastRoundPage";
 import PlaceBetPage from "@/pages/PlaceBetPage";
 import { ReactNode } from "react";
 import styles from "./page.module.css";
@@ -18,11 +19,11 @@ export default function Home() {
 }
 
 const PAGE_MAP: { [page in PageName]: ReactNode } = {
-  "last-round": null,
+  "last-round": <LastRoundPage />,
   "choose-number": <ChooseNumberPage />,
   "choose-bet-type": <ChooseBetTypePage />,
   "place-bet": <PlaceBetPage />,
   "bet-placed": <BetPlacedPage />,
-  "open-prize": null,
-  "claim": null,
+  "open-prize": "open-prize",
+  "claim": "claim",
 }

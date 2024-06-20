@@ -9,29 +9,19 @@ const useGame = () => {
   // prepare contract
   const { contract } = useContract({
     abi: ABI,
-    address: '0x',
+    address: process.env.NEXT_CONTRACT_ADDRESS,
   });
 
   // connect account with contract
   account && contract?.connect(account)
 
 
-  const startNewGame = async (ticketPrice: bigint, endTime: bigint) => {
-    await checkRunWait({
-      account,
-      contract,
-      functionName: 'start_new_game',
-      args: [ticketPrice, endTime]
-    })
-  }
-
-
-  const requestRevealResult = async (seed: number) => {
+  const requestRevealResult = async () => {
     await checkRunWait({
       account,
       contract,
       functionName: 'request_reveal_result',
-      args: [seed]
+      args: [Math.round(Math.random() * 10000000)]
     })
   }
 
@@ -52,13 +42,13 @@ const useGame = () => {
       contract,
       functionName: 'claimPrize'
     })
+  }
 
-    return {
-      startNewGame,
-      requestRevealResult,
-      buyTickets,
-      claimPrize,
-    }
+
+  return {
+    requestRevealResult,
+    buyTickets,
+    claimPrize,
   }
 }
 

@@ -47,6 +47,7 @@ const PlaceBetPage = () => {
 
 
       <ButtonGroup
+        titles={['Back', 'Confirm']}
         functions={[back, toNext]}
         disabled={[false, disableNext]}
       />

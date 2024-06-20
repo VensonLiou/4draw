@@ -1,4 +1,5 @@
 .container {
+  position: relative;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -15,6 +16,7 @@
   border-radius: 8px;
   transition: transform 0.2s, opacity 0.2s;
   min-width: 160px;
+  text-wrap: nowrap;
 }
 .container:not(.container:disabled):hover {
   transform: scale(1.02);
@@ -39,4 +41,7 @@
 .container:disabled {
   opacity: 0.5;
   cursor: default;
+}
+.loading {
+  position: absolute;
 }

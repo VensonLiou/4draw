@@ -11,27 +11,45 @@ import { Spinner } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import styles from "./page.module.css";
 
+
 export default function Home() {
-  const [pageName] = usePage()
-  const { gameInfo, latestGameRound } = useGameInfo()
+  const [pageName, setPageName] = usePage()
+  const { gameInfo, latestGameRound, latestTicketsResult } = useGameInfo()
+  console.log(useGameInfo())
 
   // 檢查有沒有前一輪
   const isFirstRound = latestGameRound === 1 && gameInfo?.game_status === 'Started'
 
   // 判斷本局是否 ended
-  const isEnded = gameInfo?.game_status === 'Ended'
+  const isEnded = gameInfo?.game_status === 'Started' && (Date.now() / 1000) > gameInfo.end_time
 
   // 判斷是否已經開獎
   const isRevealed = gameInfo?.game_status === 'Ended'
 
+  // 判斷用戶這輪有沒有下注，有就跳過選好
+  const alreadyBought = latestTicketsResult.userLatestRound === latestGameRound
+
+  // console.log(latestTicketsResult.userLatestRound , latestGameRound)
+  // console.log(alreadyBought)
+  // console.log(isRevealed) 
+  // console.log(isEnded)
+  // console.log(pageName)
 
   let redirect: PageName = pageName
+
 
   // 沒有前一輪，跳過結果頁
   if (pageName === 'last-round' && isFirstRound) redirect = 'choose-number'
 
-  // 有前一輪，但未開獎，改去開獎頁面
-  else if (isEnded && !isRevealed) redirect = 'open-prize'
+  // 有前一輪，已買票，但本輪還沒結束，改去下注完成頁面
+  else if (!isEnded && alreadyBought) redirect = 'bet-placed'
+
+  // 有前一輪，未買票，本輪結束但未開獎，改去開獎頁面
+  else if (!alreadyBought && isEnded && !isRevealed) redirect = 'open-prize'
+
+  // 但若已開獎，直接跳去結果頁
+  if (isRevealed) setPageName('last-round')
+
 
   // redirect = 'open-prize'
 

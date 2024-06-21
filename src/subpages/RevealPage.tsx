@@ -1,7 +1,9 @@
+import { usePage } from '@/atoms/page.atom'
 import TeaButton from '@/components/TeaButton/TeaButton'
 import useGame from '@/hooks/useGame'
 import useGameInfo from '@/hooks/useGameInfo'
 import { asyncWrapper } from '@/utils/asyncWrapper'
+import { sleep } from '@/utils/utils'
 import { Stack } from '@chakra-ui/react'
 import { useAccount } from '@starknet-react/core'
 import React, { useState } from 'react'
@@ -10,6 +12,7 @@ const RevealPage = () => {
   const { latestGameRound, refetchInfo } = useGameInfo()
   const { address: userAddress } = useAccount()
   const { requestRevealResult } = useGame()
+  const [, setPageName] = usePage()
 
   const [isRevealing, setIsRevealing] = useState(false);
 
@@ -18,7 +21,11 @@ const RevealPage = () => {
     shouldToast: true,
     setIsLoading: setIsRevealing,
     asyncFn: requestRevealResult,
-    onFinish: async () => await refetchInfo()
+    onSuccess: async () => setPageName('last-round'),
+    onFinish: async () => {
+      await sleep(1000)
+      await refetchInfo()
+    },
   })
 
   return (

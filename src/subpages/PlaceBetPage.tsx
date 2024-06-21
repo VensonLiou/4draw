@@ -10,17 +10,38 @@ import StepContainer from '@/components/StepContainer'
 import StepContentContainer from '@/components/StepContentContainer'
 import StepTitle from '@/components/Text/StepTitle'
 import YourNumber from '@/components/Text/YourNumber'
+import useGame from '@/hooks/useGame'
+import useGameInfo from '@/hooks/useGameInfo'
+import { asyncWrapper } from '@/utils/asyncWrapper'
 import { betTypesInvalid, userNumbersInvalid } from '@/utils/stateCheck'
 import { useAccount } from '@starknet-react/core'
+import { useState } from 'react'
 
 const PlaceBetPage = () => {
   const { address: userAddress } = useAccount()
   const [, setPage] = usePage()
   const [userNumbers] = useUserNumbers()
   const [betTypes] = useBetTypes()
+  const { buyTickets } = useGame()
+  const { refetchInfo } = useGameInfo()
 
   const back = () => setPage('choose-bet-type')
   const toNext = () => setPage('bet-placed')
+
+  const [isBuying, setIsBuying] = useState(false);
+  const buy = () => asyncWrapper({
+    name: 'buy',
+    shouldToast: true,
+    setIsLoading: setIsBuying,
+    asyncFn: async () => {
+      const _userNumber = userNumbers.join('')
+      const N = (input: any) => String(input ?? 0)
+
+      await buyTickets(_userNumber, N(betTypes.straight), N(betTypes.box), N(betTypes.set), N(betTypes.mini))
+    },
+    onFinish: async () => await refetchInfo(),
+    onSuccess: () => toNext()
+  })
 
   const disableNext = userNumbersInvalid(userNumbers) || betTypesInvalid(betTypes) || !userAddress
 
@@ -49,8 +70,9 @@ const PlaceBetPage = () => {
 
       <ButtonGroup
         titles={['Back', 'Confirm']}
-        functions={[back, toNext]}
+        functions={[back, buy]}
         disabled={[false, disableNext]}
+        isLoading={[false, isBuying]}
       />
 
     </ContentContainer>

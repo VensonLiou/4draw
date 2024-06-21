@@ -7,16 +7,16 @@ import ChooseNumberPage from "@/subpages/ChooseNumberPage";
 import LastRoundPage from "@/subpages/LastRoundPage";
 import PlaceBetPage from "@/subpages/PlaceBetPage";
 import RevealPage from "@/subpages/RevealPage";
+import RevealingPage from "@/subpages/RevealingPage";
 import { Spinner } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import styles from "./page.module.css";
-import RevealingPage from "@/subpages/RevealingPage";
 
 
 export default function Home() {
   const [pageName, setPageName] = usePage()
   const { gameInfo, latestGameRound, latestTicketsResult } = useGameInfo()
-  console.log(useGameInfo())
+  // console.log(useGameInfo())
 
   if (latestGameRound === undefined) return (
     <main className={styles.main}>

@@ -11,7 +11,7 @@ import { COLOR } from '@/css/Colors'
 interface Prop {
   showDetail?: boolean
   fee: bigint
-  isBalanceEnough: boolean
+  isBalanceEnough?: boolean
 }
 
 const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
@@ -53,20 +53,21 @@ const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
       </section>
 
       {/* user balance */}
-      <HStack alignItems={'center'} justifyContent={'space-between'} gap={3}>
-        <p>Balance: </p>
-        <HStack alignItems={'center'} gap={1}>
-          <Image
-            alt='fee token'
-            src={'/icon-tokens/ic-usdc.svg'}
-            width={20}
-            height={20}
-          />
-          <span style={isBalanceEnough ? {} : { color: COLOR.Warning }}>
-            {roundString(formattedBalance, 2)}
-          </span>
-        </HStack>
-      </HStack>
+      {isBalanceEnough !== undefined &&
+        <HStack alignItems={'center'} justifyContent={'space-between'} gap={3}>
+          <p>Balance: </p>
+          <HStack alignItems={'center'} gap={1}>
+            <Image
+              alt='fee token'
+              src={'/icon-tokens/ic-usdc.svg'}
+              width={20}
+              height={20}
+            />
+            <span style={isBalanceEnough ? {} : { color: COLOR.Warning }}>
+              {roundString(formattedBalance, 2)}
+            </span>
+          </HStack>
+        </HStack>}
     </Stack>
 
   )

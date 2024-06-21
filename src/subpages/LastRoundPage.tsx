@@ -3,51 +3,57 @@ import ContentContainer from '@/components/ContentContainer'
 import ResultSection from '@/components/ResultSection/ResultSection'
 import TeaButton from '@/components/TeaButton/TeaButton'
 import YourNumber from '@/components/Text/YourNumber'
+import useGameInfo from '@/hooks/useGameInfo'
 import { HStack } from '@chakra-ui/react'
 import { useAccount } from '@starknet-react/core'
 import styles from './pages.module.css'
-import useGameInfo from '@/hooks/useGameInfo'
 
 const LastRoundPage = () => {
   const { address: userAddress } = useAccount()
   const [, setPageName] = usePage()
-  const { latestGameRound, latestTicketsResult } = useGameInfo()
+  const { latestGameRound, latestTicketsResult, gameInfo, previusRoundResult } = useGameInfo()
+
+  if (!latestGameRound) return null
+
+  const latestRoundResult = gameInfo.latest_result_number
+  const userLatestRoundResult = latestTicketsResult.userLatestRoundResult
+  const displayedResult = userLatestRoundResult ?? latestRoundResult ?? previusRoundResult
+
 
   const userLatestRound = latestTicketsResult.userLatestRound
+  const displayedRound = userLatestRound ||
+    latestRoundResult === undefined
+    ? latestGameRound - 1
+    : latestGameRound
 
+  const userLatestRoundNumber = latestTicketsResult.userTickets?.picked_number
 
-  const userLatestRoundNumber = latestTicketsResult.userTickets.picked_number
-  const userLatestRoundResult = latestTicketsResult.userLatestRoundResult
-
-  const isWin = Boolean(
-    (userLatestRoundResult && userLatestRoundNumber)
-    && userLatestRoundResult.join('') === userLatestRoundNumber.join('')
-  )
-
-  const isClaimed = latestTicketsResult.userTickets?.claimed
-
-  const prize = latestTicketsResult.unclaimed_prize
-
+  const gameNotStarted = gameInfo.game_status === 'NotStarted'
+  const waitingForNextRound = gameNotStarted || gameInfo.game_status === 'Ended'
 
   return (
     <ContentContainer>
-      <h2 className={styles.title}>
-        The Winning Numbers for Round #{userLatestRound || latestGameRound} are:
-      </h2>
+      {!gameNotStarted && <h2 className={styles.title}>
+        The Winning Numbers for Round #{displayedRound} are:
+      </h2>}
 
       <HStack gap={8}>
-        {userLatestRoundResult?.map(i => (
+        {displayedResult?.map(i => (
           <span key={i} className={styles.winningNumber}>
             {i}
           </span>
         ))}
       </HStack>
-      {userAddress && userLatestRoundResult
+
+      {(userAddress && userLatestRoundResult)
         ? <>
           <YourNumber _userNumbers={userLatestRoundNumber} />
-          <ResultSection isClaimed={isClaimed} isWin={isWin} prize={prize} />
+          <ResultSection />
         </>
-        : <TeaButton title='Place a New Bet' onClick={() => setPageName('choose-number')} />
+        : <>
+          {waitingForNextRound && <p>Please wait for game manager to start a new round.</p>}
+          <TeaButton title='Place a New Bet' onClick={() => setPageName('choose-number')} disabled={waitingForNextRound} />
+        </>
       }
     </ContentContainer>
   )

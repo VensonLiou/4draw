@@ -8,17 +8,37 @@ import ButtonGroup from '../ButtonGroup/ButtonGroup'
 import styles from './ResultSection.module.css'
 
 interface Prop {
-  isWin: boolean,
-  isClaimed: boolean
-  prize?: bigint
+
 }
 
-const ResultSection: FC<Prop> = ({ isWin, isClaimed, prize }) => {
+const ResultSection: FC<Prop> = () => {
   const [, setPageName] = usePage()
   const [isClaiming, setIsClaiming] = useState(false);
   const { refetchInfo } = useGameInfo()
   const { claimPrize } = useGame()
 
+
+  const { latestGameRound, latestTicketsResult, gameInfo } = useGameInfo()
+
+  const userLatestRound = latestTicketsResult.userLatestRound
+
+
+  const userLatestRoundNumber = latestTicketsResult.userTickets?.picked_number
+  const userLatestRoundResult = latestTicketsResult.userLatestRoundResult
+
+  const isWin = Boolean(
+    (userLatestRoundResult && userLatestRoundNumber)
+    && userLatestRoundResult.join('') === userLatestRoundNumber.join('')
+  )
+
+  const isClaimed = Boolean(latestTicketsResult.userTickets?.claimed)
+
+  const prize = latestTicketsResult.unclaimed_prize
+
+  const gameNotStarted = gameInfo.game_status === 'NotStarted'
+  const waitingForNextRound = gameNotStarted || gameInfo.game_status === 'Ended'
+
+  // functions
   const toChooseNumber = () => setPageName('choose-number')
   const claim = () => asyncWrapper({
     name: 'claim',
@@ -28,24 +48,21 @@ const ResultSection: FC<Prop> = ({ isWin, isClaimed, prize }) => {
     onSuccess: async () => await refetchInfo()
   })
 
-  const disablePlaceAnotherBet = isClaiming
+  // disables
+  const disablePlaceAnotherBet = isClaiming || Boolean(gameNotStarted)
   const disableClaimPrize = isClaimed
 
   return (
     <div className={styles.container}>
-      {isWin
-        ? isClaimed
-          ? <p> Congratulations! <br />
-            You have claimed your prize.
-          </p >
-          : <p>
-            Congratulations! <br />
-            You won <span className={styles.prize}>{formatUnits(prize, 18)} USDC!</span>
-          </p>
-        : <p>Good luck next time!</p>
-      }
+      <p>
+        {isWin && <span>Congratulations!<br /></span>}
+        {isWin && isClaimed
+          ? <>You have claimed your prize.</>
+          : <>You won <span className={styles.prize}>{formatUnits(prize, 18)} USDC!</span></>
+        }
+      </p>
 
-
+      {waitingForNextRound && <p>Please wait for game manager to start a new round.</p>}
       <ButtonGroup
         titles={[
           'Place Another Bet',

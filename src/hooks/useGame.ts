@@ -53,7 +53,7 @@ const useGame = () => {
     })
   }
 
-  const approveAndBuy = async (picked_number: string, straight_amount: string, box_amount: string, set_amount: string, mini_amount: string) => {
+  const approveAndBuy = async (picked_number: bigint, straight_amount: bigint, box_amount: bigint, set_amount: bigint, mini_amount: bigint) => {
     if (!account || !basePrice) return
     const p = basePrice
     const totalFee = multiplyString(straight_amount, String(p))
@@ -73,13 +73,13 @@ const useGame = () => {
       {
         contractAddress: CONTRACT_ADDRESS,
         entrypoint: 'buy_tickets',
-        calldata: CallData.compile([
-          picked_number,
-          straight_amount,
-          box_amount,
-          set_amount,
-          mini_amount
-        ])
+        calldata: CallData.compile({
+          picked_number: picked_number,
+          straight_amount: cairo.uint256(straight_amount),
+          box_amount: cairo.uint256(box_amount),
+          set_amount: cairo.uint256(set_amount),
+          mini_amount: cairo.uint256(mini_amount),
+        })
       }
     ])
 

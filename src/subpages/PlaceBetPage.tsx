@@ -37,9 +37,9 @@ const PlaceBetPage = () => {
     setIsLoading: setIsBuying,
     asyncFn: async () => {
       const _userNumber = userNumbers.join('')
-      const N = (input: any) => String(input ?? 0)
+      const N = (input: any) => BigInt(input ?? 0)
 
-      await approveAndBuy(_userNumber, N(betTypes.straight), N(betTypes.box), N(betTypes.set), N(betTypes.mini))
+      await approveAndBuy(N(_userNumber), N(betTypes.straight), N(betTypes.box), N(betTypes.set), N(betTypes.mini))
     },
     onFinish: async () => await Promise.all([refetchInfo(), refetchPaymentToken()]),
     onSuccess: () => toNext()

@@ -16,7 +16,7 @@ const ResultSection: FC<Prop> = () => {
   const [, setPageName] = usePage()
   const [isClaiming, setIsClaiming] = useState(false);
   const { refetchInfo } = useGameInfo()
-  const { refetchPaymentToken } = usePaymentToken()
+  const { refetchPaymentToken, symbol } = usePaymentToken()
   const { claimPrize } = useGame()
 
 
@@ -57,7 +57,7 @@ const ResultSection: FC<Prop> = () => {
         {isWin && <span>Congratulations!<br /></span>}
         {isWin && isClaimed
           ? <>You have claimed your prize.</>
-          : <>You won <span className={styles.prize}>{formatUnits(prize, 18)} USDC!</span></>
+          : <>You won <span className={styles.prize}>{prize ? formatUnits(prize, 18) : ''} {symbol ?? ''}!</span></>
         }
       </p>
 

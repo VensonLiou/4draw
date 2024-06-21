@@ -16,7 +16,7 @@ const TotalBetSection = () => {
 
   return (
     <section className={styles.container}>
-      <h3 className={styles.total}>Total Bets <span>{commafy(totalBets)} USDC</span></h3>
+      <h3 className={styles.total}>Total Bets <span>{commafy(totalBets)} {symbol ?? ''}</span></h3>
 
 
       <ul className={styles.betTypeList}>

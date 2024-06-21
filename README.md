@@ -4,6 +4,8 @@
 
 [Demo](https://draw-49019.web.app/)
 
+<img src=".imgs/how_it_works.png" width="595" height="350">
+
 ## How to Play
 
 1. Selecting Numbers:

@@ -14,8 +14,12 @@ import useGame from '@/hooks/useGame'
 import useGameInfo from '@/hooks/useGameInfo'
 import usePaymentToken from '@/hooks/usePaymentToken'
 import { asyncWrapper } from '@/utils/asyncWrapper'
+import { formatUnits } from '@/utils/parseUnits'
 import { betTypesInvalid, userNumbersInvalid } from '@/utils/stateCheck'
+import { roundString } from '@/utils/utils'
+import { HStack, Stack } from '@chakra-ui/react'
 import { useAccount } from '@starknet-react/core'
+import Image from 'next/image'
 import { useState } from 'react'
 
 const PlaceBetPage = () => {
@@ -24,7 +28,7 @@ const PlaceBetPage = () => {
   const [userNumbers] = useUserNumbers()
   const [betTypes] = useBetTypes()
   const { approveAndBuy } = useGame()
-  const { refetchPaymentToken } = usePaymentToken()
+  const { balance, decimals, refetchPaymentToken } = usePaymentToken()
   const { refetchInfo } = useGameInfo()
 
   const back = () => setPage('choose-bet-type')
@@ -47,6 +51,8 @@ const PlaceBetPage = () => {
 
   const disableNext = userNumbersInvalid(userNumbers) || betTypesInvalid(betTypes) || !userAddress
 
+  const formattedBalance = balance === undefined ? '- -' : formatUnits(balance, decimals)
+
   return (
     <ContentContainer>
 
@@ -65,8 +71,25 @@ const PlaceBetPage = () => {
         <StepContentContainer gap={20}>
           <YourNumber />
           <BetTypeSummarySection />
-          <FeeSection />
+
+          <Stack alignItems={'stretch'} w={200}>
+            <FeeSection />
+            {/* user balance */}
+            <HStack alignItems={'center'} justifyContent={'space-between'} gap={3}>
+              <p>Balance: </p>
+              <HStack alignItems={'center'} gap={1}>
+                <Image
+                  alt='fee token'
+                  src={'/icon-tokens/ic-usdc.svg'}
+                  width={20}
+                  height={20}
+                />
+                <span>{roundString(formattedBalance, 2)}</span>
+              </HStack>
+            </HStack>
+          </Stack>
         </StepContentContainer>
+
       </StepContainer>
 
 

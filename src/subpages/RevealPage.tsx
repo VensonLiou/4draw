@@ -18,8 +18,12 @@ const RevealPage = () => {
   const reveal = () => asyncWrapper({
     name: 'reveal',
     shouldToast: true,
-    setIsLoading: setIsRevealing,
-    asyncFn: requestRevealResult,
+    setIsLoading: () => { },
+    asyncFn: async () => {
+      setIsRevealing(true)
+      await requestRevealResult()
+    },
+    onError: () => setIsRevealing(false),
     onSuccess: async () => setPageName('revealing'),
     onFinish: async () => await refetchInfo(),
   })

@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js';
-
+import dateformat from 'dateformat'
 Decimal.set({ toExpNeg: -100, toExpPos: 100, precision: 40 })
 
 type BigIntish = string | bigint
@@ -75,4 +75,8 @@ export const sleep = async (ms: number) => {
   await new Promise(res => setTimeout(() => {
     res('')
   }, ms))
+}
+
+export const formatDate = (sec: number | string | bigint, format: string = 'yyyy/mm/dd HH:MM') => {
+  return dateformat(Number(sec) * 1000, format)
 }

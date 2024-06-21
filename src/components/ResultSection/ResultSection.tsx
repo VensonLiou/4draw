@@ -6,6 +6,7 @@ import { formatUnits } from '@/utils/parseUnits'
 import { FC, useState } from 'react'
 import ButtonGroup from '../ButtonGroup/ButtonGroup'
 import styles from './ResultSection.module.css'
+import usePaymentToken from '@/hooks/usePaymentToken'
 
 interface Prop {
 
@@ -15,6 +16,7 @@ const ResultSection: FC<Prop> = () => {
   const [, setPageName] = usePage()
   const [isClaiming, setIsClaiming] = useState(false);
   const { refetchInfo } = useGameInfo()
+  const { refetchPaymentToken } = usePaymentToken()
   const { claimPrize } = useGame()
 
 
@@ -45,7 +47,7 @@ const ResultSection: FC<Prop> = () => {
     shouldToast: true,
     setIsLoading: setIsClaiming,
     asyncFn: claimPrize,
-    onSuccess: async () => await refetchInfo()
+    onSuccess: async () => await Promise.all([refetchInfo(), refetchPaymentToken()])
   })
 
   // disables

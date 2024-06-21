@@ -1,10 +1,9 @@
 import ABI from '@/configs/ABI';
+import { multiplyString } from '@/utils/utils';
 import { useAccount, useContract } from '@starknet-react/core';
 import toast from 'react-hot-toast';
-import { AccountInterface, CallData, Contract, TransactionType, cairo } from 'starknet';
-import usePaymentToken from './usePaymentToken';
+import { AccountInterface, CallData, Contract, cairo } from 'starknet';
 import useGameInfo from './useGameInfo';
-import { multiplyString } from '@/utils/utils';
 
 
 const CONTRACT_ADDRESS = process.env.NEXT_CONTRACT_ADDRESS
@@ -12,7 +11,6 @@ const TOKEN_ADDRESS = process.env.NEXT_TOKEN_ADDRESS
 
 const useGame = () => {
   const { account } = useAccount()
-  const { balance, decimal } = usePaymentToken()
   const { gameInfo } = useGameInfo()
   const basePrice = gameInfo.ticket_price
 

@@ -12,6 +12,7 @@ import StepTitle from '@/components/Text/StepTitle'
 import YourNumber from '@/components/Text/YourNumber'
 import useGame from '@/hooks/useGame'
 import useGameInfo from '@/hooks/useGameInfo'
+import usePaymentToken from '@/hooks/usePaymentToken'
 import { asyncWrapper } from '@/utils/asyncWrapper'
 import { betTypesInvalid, userNumbersInvalid } from '@/utils/stateCheck'
 import { useAccount } from '@starknet-react/core'
@@ -23,6 +24,7 @@ const PlaceBetPage = () => {
   const [userNumbers] = useUserNumbers()
   const [betTypes] = useBetTypes()
   const { approveAndBuy } = useGame()
+  const { refetchPaymentToken } = usePaymentToken()
   const { refetchInfo } = useGameInfo()
 
   const back = () => setPage('choose-bet-type')
@@ -39,7 +41,7 @@ const PlaceBetPage = () => {
 
       await approveAndBuy(_userNumber, N(betTypes.straight), N(betTypes.box), N(betTypes.set), N(betTypes.mini))
     },
-    onFinish: async () => await refetchInfo(),
+    onFinish: async () => await Promise.all([refetchInfo(), refetchPaymentToken()]),
     onSuccess: () => toNext()
   })
 

@@ -2,6 +2,8 @@
 
 4Draw is a decentralized lottery game featuring a smart contract for transparent operations, a user-friendly UI for ticket purchases and prize claims, and integration with Pragma’s VRF contract to ensure fairness.
 
+[Demo](https://draw-49019.web.app/)
+
 ## Smart Contract
 
 ### Installation
@@ -116,7 +118,7 @@ yarn dev
 ```bash
 yarn build
 
-yarn start
+npx serve@latest out
 ```
 
 ### How to update (subtree)

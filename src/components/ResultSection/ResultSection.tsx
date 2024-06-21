@@ -59,15 +59,17 @@ const ResultSection: FC<Prop> = () => {
           ? <>You have claimed your prize.</>
           : <>You won <span className={styles.prize}>{prize ? formatUnits(prize, 18) : ''} {symbol ?? ''}!</span></>)
         }
+        {!isWin && <span>Good luck next time!</span>}
       </p>
 
       {waitingForNextRound && <p>Please wait for game manager to start a new round.</p>}
 
       <ButtonGroup
-        titles={[
-          'Place Another Bet',
-          isClaimed ? 'Claimed' : 'Claim Prize'
-        ]}
+        titles={
+          isWin
+            ? ['Place Another Bet', isClaimed ? 'Claimed' : 'Claim Prize']
+            : ['Place Another Bet']
+        }
         outlined={[true, false]}
         functions={[toChooseNumber, claim]}
         isLoading={[false, isClaiming]}

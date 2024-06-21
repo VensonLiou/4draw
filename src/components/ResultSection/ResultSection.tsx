@@ -20,10 +20,7 @@ const ResultSection: FC<Prop> = () => {
   const { claimPrize } = useGame()
 
 
-  const { latestGameRound, latestTicketsResult, gameInfo } = useGameInfo()
-
-  const userLatestRound = latestTicketsResult.userLatestRound
-
+  const { latestTicketsResult, gameInfo } = useGameInfo()
 
   const userLatestRoundNumber = latestTicketsResult.userTickets?.picked_number
   const userLatestRoundResult = latestTicketsResult.userLatestRoundResult

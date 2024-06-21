@@ -4,6 +4,9 @@ import { HStack, Stack } from '@chakra-ui/react'
 import Image from 'next/image'
 import styles from './FeeSection.module.css'
 import { FC } from 'react'
+import useGameInfo from '@/hooks/useGameInfo'
+import { formatUnits } from '@/utils/parseUnits'
+import usePaymentToken from '@/hooks/usePaymentToken'
 
 interface Prop {
   showDetail?: boolean
@@ -11,13 +14,22 @@ interface Prop {
 
 const FeeSection: FC<Prop> = ({ showDetail }) => {
   const [betTypes] = useBetTypes()
+  const { gameInfo } = useGameInfo()
+  const { decimals, symbol } = usePaymentToken()
+  const price = gameInfo.ticket_price
+  const setPrice = gameInfo.ticket_price * 2n
+  const formattedPrice = formatUnits(price, decimals)
+  const formattedSetPrice = formatUnits(setPrice, decimals)
+
 
   const entries = Object.entries(betTypes)
   const fee = entries.reduce((prev, currentEntry) => {
-    const [key, value] = currentEntry as [BetType, number]
-    if (key === 'set') return prev + (2 * (value ?? 0))
-    return prev + ((value ?? 0) * 1)
-  }, 0)
+    const [key, value] = currentEntry
+    if (key === 'set') return prev + BigInt(value ?? 0n) * setPrice
+    return prev + (BigInt(value ?? 0n) * price)
+  }, 0n)
+
+  const formattedFee = formatUnits(fee, decimals)
 
   return (
     <section className={styles.container}>
@@ -31,13 +43,13 @@ const FeeSection: FC<Prop> = ({ showDetail }) => {
               width={20}
               height={20}
             />
-            <span>{roundString(String(fee), 2)}</span>
+            <span>{roundString(formattedFee, 4)}</span>
           </HStack>
         </HStack>
 
         {showDetail && <p>
-          1 USDC for Straight, Box, and Mini types.<br />
-          2 USDC for Set type.
+          {formattedPrice} {symbol ?? ''} for Straight, Box, and Mini types.<br />
+          {formattedSetPrice} {symbol ?? ''} for Set type.
         </p>}
       </Stack>
     </section>

@@ -21,6 +21,10 @@ const useGameInfo = () => {
   const { data: data4, refetch: r4 } = read({ ...opt, functionName: 'latest_tickets_result', args: [userAddress!], enabled: B(userAddress) })
   const { data: data5, refetch: r5 } = read({ ...opt, functionName: 'game_info', args: [String(data3)!], enabled: B(data3) })
 
+  // 從第二輪開始，需要抓前一輪的中獎號碼
+  const { data: data6, refetch: r6 } = read({ ...opt, functionName: 'game_info', args: [String(Number(data1) - 1)!], enabled: Number(data1) > 1 })
+
+
   // console.log('/ /// / /// / ///')
   // console.log(['latest_game_round', data1])
   // console.log(['game_info', data2])
@@ -37,14 +41,18 @@ const useGameInfo = () => {
     total_straight_prize_accumulated
   } = data2 as any ?? {}
 
+
   const { 0: userLatestRound, 1: revealed, 2: _userTickets, 3: unclaimed_prize } = (
     data4 ? data4 : {}
   ) as { 0?: bigint, 1?: boolean, 2?: UserTicketInfo, 3?: bigint }
 
+
   const userLatestRoundResult = ((Boolean(userLatestRound) ? data5 : {}) as { result_number?: bigint }).result_number
+  const previusRoundResult = ((data6 ?? {}) as { result_number?: bigint }).result_number
+
 
   const userTickets = _userTickets && {
-    picked_number: bigintishToArray(_userTickets.picked_number),
+    picked_number: bigintishToArray(userLatestRound === 0n ? undefined : _userTickets.picked_number),
     claimed: _userTickets.claimed,
     straight_amount: Number(_userTickets.straight_amount),
     box_amount: Number(_userTickets.box_amount),
@@ -52,32 +60,34 @@ const useGameInfo = () => {
     mini_amount: Number(_userTickets.mini_amount),
   }
 
+
   const refetchInfo = async () => {
-    await Promise.all([r1(), r2(), r3(), r4(), r5(),])
+    await Promise.all([r1(), r2(), r3(), r4(), r5(), r6()])
   }
 
 
-  return MOCK_GAME_INFO
-  // return {
-  //   latestGameRound: data1 === undefined ? undefined : Number(data1),
-  //   gameInfo: data2 ? {
-  //     end_time: Number(end_time),
-  //     game_status: game_status.activeVariant() as GameStatus,
-  //     latest_result_number: bigintishToArray(result_number),
-  //     ticket_price: ticket_price as bigint,
-  //     total_box_prize_accumulated: total_box_prize_accumulated as bigint,
-  //     total_mini_prize_accumulated: total_mini_prize_accumulated as bigint,
-  //     total_straight_prize_accumulated: total_straight_prize_accumulated as bigint
-  //   } : undefined,
-  //   latestTicketsResult: {
-  //     userLatestRound: Number(userLatestRound),
-  //     revealed,
-  //     userTickets,
-  //     unclaimed_prize,
-  //     userLatestRoundResult: userLatestRoundResult === undefined ? undefined : bigintishToArray(userLatestRoundResult)
-  //   },
-  //   refetchInfo,
-  // }
+  // return MOCK_GAME_INFO
+  return {
+    latestGameRound: data1 === undefined ? undefined : Number(data1),
+    gameInfo: {
+      end_time: Number(end_time),
+      game_status: game_status?.activeVariant() as GameStatus,
+      latest_result_number: bigintishToArray((game_status?.activeVariant() as GameStatus === 'Ended') ? result_number : undefined),
+      ticket_price: ticket_price as bigint,
+      total_box_prize_accumulated: total_box_prize_accumulated as bigint,
+      total_mini_prize_accumulated: total_mini_prize_accumulated as bigint,
+      total_straight_prize_accumulated: total_straight_prize_accumulated as bigint
+    },
+    latestTicketsResult: {
+      userLatestRound: Number(userLatestRound),
+      revealed,
+      userTickets,
+      unclaimed_prize,
+      userLatestRoundResult: userLatestRoundResult === undefined ? undefined : bigintishToArray(userLatestRoundResult)
+    },
+    previusRoundResult: bigintishToArray(previusRoundResult),
+    refetchInfo,
+  }
 }
 
 export default useGameInfo

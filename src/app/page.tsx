@@ -18,6 +18,11 @@ export default function Home() {
   const { gameInfo, latestGameRound, latestTicketsResult } = useGameInfo()
   console.log(useGameInfo())
 
+  if (latestGameRound === undefined) return (
+    <main className={styles.main}>
+      <Loading />
+    </main>
+  )
   // 檢查是不是第0輪
   const notStarted = gameInfo?.game_status === 'NotStarted'
 
@@ -80,14 +85,18 @@ export default function Home() {
     <main className={styles.main}>
       {gameInfo?.game_status
         ? PAGE_MAP[redirect]
-        : <Spinner
-          thickness='6px'
-          speed='0.8s'
-          emptyColor='gray.200'
-          color='p.600'
-          size='xl'
-        />
+        : <Loading />
       }
     </main>
   );
 }
+
+
+const Loading = () =>
+  <Spinner
+    thickness='6px'
+    speed='0.8s'
+    emptyColor='gray.200'
+    color='p.600'
+    size='xl'
+  />

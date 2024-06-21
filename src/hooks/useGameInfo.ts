@@ -47,7 +47,7 @@ const useGameInfo = () => {
   ) as { 0?: bigint, 1?: boolean, 2?: UserTicketInfo, 3?: bigint }
 
 
-  const userLatestRoundResult = ((Boolean(userLatestRound) ? data5 : {}) as { result_number?: bigint }).result_number
+  const userLatestRoundResult = ((Boolean(userLatestRound) ? data5 : {}) as { result_number?: bigint })?.result_number
   const previusRoundResult = ((data6 ?? {}) as { result_number?: bigint }).result_number
 
 

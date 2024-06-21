@@ -22,7 +22,7 @@ const PlaceBetPage = () => {
   const [, setPage] = usePage()
   const [userNumbers] = useUserNumbers()
   const [betTypes] = useBetTypes()
-  const { buyTickets } = useGame()
+  const { approveAndBuy } = useGame()
   const { refetchInfo } = useGameInfo()
 
   const back = () => setPage('choose-bet-type')
@@ -37,7 +37,7 @@ const PlaceBetPage = () => {
       const _userNumber = userNumbers.join('')
       const N = (input: any) => String(input ?? 0)
 
-      await buyTickets(_userNumber, N(betTypes.straight), N(betTypes.box), N(betTypes.set), N(betTypes.mini))
+      await approveAndBuy(_userNumber, N(betTypes.straight), N(betTypes.box), N(betTypes.set), N(betTypes.mini))
     },
     onFinish: async () => await refetchInfo(),
     onSuccess: () => toNext()

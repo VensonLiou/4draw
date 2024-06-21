@@ -70,7 +70,7 @@ const ResultSection: FC<Prop> = () => {
             ? ['Place Another Bet', isClaimed ? 'Claimed' : 'Claim Prize']
             : ['Place Another Bet']
         }
-        outlined={[true, false]}
+        outlined={[isWin, false]}
         functions={[toChooseNumber, claim]}
         isLoading={[false, isClaiming]}
         disabled={[disablePlaceAnotherBet, disableClaimPrize]}

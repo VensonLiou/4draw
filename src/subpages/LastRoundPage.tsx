@@ -9,27 +9,28 @@ import { useAccount } from '@starknet-react/core'
 import styles from './pages.module.css'
 
 const LastRoundPage = () => {
-  const { address: userAddress } = useAccount()
   const [, setPageName] = usePage()
   const { latestGameRound, latestTicketsResult, gameInfo, previusRoundResult } = useGameInfo()
 
-  if (!latestGameRound) return null
 
   const latestRoundResult = gameInfo.latest_result_number
   const userLatestRoundResult = latestTicketsResult.userLatestRoundResult
   const displayedResult = userLatestRoundResult ?? latestRoundResult ?? previusRoundResult
 
-
-  const userLatestRound = latestTicketsResult.userLatestRound
-  const displayedRound = userLatestRound ||
-    latestRoundResult === undefined
-    ? latestGameRound - 1
-    : latestGameRound
-
   const userLatestRoundNumber = latestTicketsResult.userTickets?.picked_number
 
   const gameNotStarted = gameInfo.game_status === 'NotStarted'
   const waitingForNextRound = gameNotStarted || gameInfo.game_status === 'Ended'
+
+  const userPlayedBefore = latestTicketsResult.userLatestRound > 0
+
+  if (latestGameRound === undefined) return null
+
+  const displayedRound = !userPlayedBefore && latestRoundResult === undefined
+    ? latestGameRound - 1
+    : latestGameRound
+
+
 
   return (
     <ContentContainer>
@@ -45,15 +46,13 @@ const LastRoundPage = () => {
         ))}
       </HStack>
 
-      {(userAddress && userLatestRoundResult)
-        ? <>
-          <YourNumber _userNumbers={userLatestRoundNumber} />
-          <ResultSection />
-        </>
-        : <>
-          {waitingForNextRound && <p>Please wait for game manager to start a new round.</p>}
-          <TeaButton title='Place a New Bet' onClick={() => setPageName('choose-number')} disabled={waitingForNextRound} />
-        </>
+      {waitingForNextRound && <p>Please wait for game manager to start a new round.</p>}
+
+      {userPlayedBefore ? <>
+        <YourNumber _userNumbers={userLatestRoundNumber} />
+        <ResultSection />
+      </>
+        : <TeaButton title='Place a New Bet' onClick={() => setPageName('choose-number')} disabled={waitingForNextRound} />
       }
     </ContentContainer>
   )

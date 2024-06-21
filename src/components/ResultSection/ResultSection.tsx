@@ -48,20 +48,21 @@ const ResultSection: FC<Prop> = () => {
   })
 
   // disables
-  const disablePlaceAnotherBet = isClaiming || Boolean(gameNotStarted)
+  const disablePlaceAnotherBet = isClaiming || Boolean(waitingForNextRound)
   const disableClaimPrize = isClaimed
 
   return (
     <div className={styles.container}>
       <p>
         {isWin && <span>Congratulations!<br /></span>}
-        {isWin && isClaimed
+        {isWin && (isClaimed
           ? <>You have claimed your prize.</>
-          : <>You won <span className={styles.prize}>{prize ? formatUnits(prize, 18) : ''} {symbol ?? ''}!</span></>
+          : <>You won <span className={styles.prize}>{prize ? formatUnits(prize, 18) : ''} {symbol ?? ''}!</span></>)
         }
       </p>
 
       {waitingForNextRound && <p>Please wait for game manager to start a new round.</p>}
+
       <ButtonGroup
         titles={[
           'Place Another Bet',

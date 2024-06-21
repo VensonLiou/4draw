@@ -33,8 +33,8 @@ const FeeSection: FC<Prop> = ({ showDetail }) => {
 
   return (
     <section className={styles.container}>
-      <Stack gap={'20px'}>
-        <HStack alignItems={'center'} gap={3}>
+      <Stack gap={'20px'} >
+        <HStack justifyContent={'space-between'} alignItems={'center'} gap={3}>
           <p>Fees: </p>
           <HStack alignItems={'center'} gap={1}>
             <Image
@@ -43,7 +43,7 @@ const FeeSection: FC<Prop> = ({ showDetail }) => {
               width={20}
               height={20}
             />
-            <span>{roundString(formattedFee, 4)}</span>
+            <span>{roundString(formattedFee, 2)}</span>
           </HStack>
         </HStack>
 

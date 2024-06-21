@@ -67,17 +67,17 @@ const checkRunWait = async ({ contract, account, functionName, args }: Prop) => 
   if (!args) args = []
 
   // staticCall 
-  const { calldata } = contract.populate(functionName, args)
-  const staticCallResult = await account?.simulateTransaction(
-    [{
-      type: TransactionType.INVOKE,
-      calldata,
-      entrypoint: functionName,
-      contractAddress: contract.address,
-    }],
-    { skipValidate: true }
-  )
-  console.log({ staticCallResult })
+  // const { calldata } = contract.populate(functionName, args)
+  // const staticCallResult = await account?.simulateTransaction(
+  //   [{
+  //     type: TransactionType.INVOKE,
+  //     calldata,
+  //     entrypoint: functionName,
+  //     contractAddress: contract.address,
+  //   }],
+  //   { skipValidate: true }
+  // )
+  // console.log({ staticCallResult })
 
 
   const res = await contract[functionName](...args)

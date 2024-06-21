@@ -3,10 +3,9 @@ import TeaButton from '@/components/TeaButton/TeaButton'
 import useGame from '@/hooks/useGame'
 import useGameInfo from '@/hooks/useGameInfo'
 import { asyncWrapper } from '@/utils/asyncWrapper'
-import { sleep } from '@/utils/utils'
 import { Stack } from '@chakra-ui/react'
 import { useAccount } from '@starknet-react/core'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 const RevealPage = () => {
   const { latestGameRound, refetchInfo } = useGameInfo()
@@ -21,11 +20,8 @@ const RevealPage = () => {
     shouldToast: true,
     setIsLoading: setIsRevealing,
     asyncFn: requestRevealResult,
-    onSuccess: async () => setPageName('last-round'),
-    onFinish: async () => {
-      await sleep(1000)
-      await refetchInfo()
-    },
+    onSuccess: async () => setPageName('revealing'),
+    onFinish: async () => await refetchInfo(),
   })
 
   return (

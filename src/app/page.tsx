@@ -10,12 +10,16 @@ import RevealPage from "@/subpages/RevealPage";
 import { Spinner } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import styles from "./page.module.css";
+import RevealingPage from "@/subpages/RevealingPage";
 
 
 export default function Home() {
   const [pageName, setPageName] = usePage()
   const { gameInfo, latestGameRound, latestTicketsResult } = useGameInfo()
   console.log(useGameInfo())
+
+  // 檢查是不是第0輪
+  const notStarted = gameInfo?.game_status === 'NotStarted'
 
   // 檢查有沒有前一輪
   const isFirstRound = latestGameRound === 1 && gameInfo?.game_status === 'Started'
@@ -29,6 +33,9 @@ export default function Home() {
   // 判斷用戶這輪有沒有下注，有就跳過選好
   const alreadyBought = latestTicketsResult.userLatestRound === latestGameRound
 
+  // 判斷是否正在開獎
+  const isRevealing = gameInfo?.game_status === 'Revealing'
+
   // console.log(latestTicketsResult.userLatestRound , latestGameRound)
   // console.log(alreadyBought)
   // console.log(isRevealed) 
@@ -37,9 +44,10 @@ export default function Home() {
 
   let redirect: PageName = pageName
 
+  if (notStarted) return <LastRoundPage />
 
   // 沒有前一輪，跳過結果頁
-  if (pageName === 'last-round' && isFirstRound) redirect = 'choose-number'
+  else if (pageName === 'last-round' && isFirstRound) redirect = 'choose-number'
 
   // 有前一輪，已買票，但本輪還沒結束，改去下注完成頁面
   else if (!isEnded && alreadyBought) redirect = 'bet-placed'
@@ -47,11 +55,15 @@ export default function Home() {
   // 有前一輪，未買票，本輪結束但未開獎，改去開獎頁面
   else if (!alreadyBought && isEnded && !isRevealed) redirect = 'open-prize'
 
+
+
   // 但若已開獎，直接跳去結果頁
   if (isRevealed) setPageName('last-round')
 
+  // 如果正在開獎
+  if (isRevealing) setPageName('revealing')
 
-  // redirect = 'open-prize'
+  // redirect = 'revealing'
 
   const PAGE_MAP: { [page in PageName]: ReactNode } = {
     "last-round": <LastRoundPage />,
@@ -59,7 +71,8 @@ export default function Home() {
     "choose-bet-type": <ChooseBetTypePage />,
     "place-bet": <PlaceBetPage />,
     "bet-placed": <BetPlacedPage />,
-    "open-prize": <RevealPage />
+    "open-prize": <RevealPage />,
+    "revealing": <RevealingPage />
   }
 
 

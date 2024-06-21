@@ -42,7 +42,7 @@ interface Prop {
 
 const TypeAmountInput: FC<Prop> = ({ type, value, onChange }) => {
   return (
-    <HStack justifyContent={'space-between'} alignItems={'center'} minW={'280px'}>
+    <HStack justifyContent={'space-between'} alignItems={'center'} minW={'280px'} maxW={320}>
       <h2 className={styles.typeName}>{CapitalizeFirstLetter(type)}: </h2>
       <HStack gap={4}>
         <NumberInput focusBorderColor='p.600' value={value === undefined ? '' : String(value)} >

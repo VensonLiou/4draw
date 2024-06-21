@@ -22,7 +22,8 @@ const TeaButton: FC<Prop> = ({ title, secondary, outlined, disabled, isLoading, 
 
   return (
     <button
-      {...{ disabled, onClick }}
+      disabled={isLoading || disabled}
+      {...{ onClick }}
       className={
         styles.container + ' '
         + (secondary ? styles.secondary : '') + ' '

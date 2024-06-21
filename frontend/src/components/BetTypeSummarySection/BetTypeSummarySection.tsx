@@ -1,9 +1,11 @@
-import { useBetTypes } from '@/atoms/betTypes.atom'
+import { BetTypes, useBetTypes } from '@/atoms/betTypes.atom'
 import { Dot } from '../TotalBetSection/TotalBetSection'
 import styles from './BetTypeSummarySection.module.css'
 
-const BetTypeSummarySection = () => {
-  const [betTypes] = useBetTypes()
+const BetTypeSummarySection = ({ _betTypes }: { _betTypes?: BetTypes }) => {
+  const [globalBetTypes] = useBetTypes()
+
+  const betTypes = _betTypes ?? globalBetTypes
 
   const straightBets = betTypes.straight ?? 0
   const boxBets = betTypes.box ?? 0

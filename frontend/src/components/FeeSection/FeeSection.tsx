@@ -1,29 +1,61 @@
-import { BetType, useBetTypes } from '@/atoms/betTypes.atom'
+import useGameInfo from '@/hooks/useGameInfo'
+import usePaymentToken from '@/hooks/usePaymentToken'
+import { formatUnits } from '@/utils/parseUnits'
 import { roundString } from '@/utils/utils'
 import { HStack, Stack } from '@chakra-ui/react'
 import Image from 'next/image'
-import styles from './FeeSection.module.css'
 import { FC } from 'react'
+import styles from './FeeSection.module.css'
+import { COLOR } from '@/css/Colors'
 
 interface Prop {
   showDetail?: boolean
+  fee: bigint
+  isBalanceEnough?: boolean
 }
 
-const FeeSection: FC<Prop> = ({ showDetail }) => {
-  const [betTypes] = useBetTypes()
+const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
+  const { gameInfo } = useGameInfo()
+  const { balance, decimals, symbol } = usePaymentToken()
 
-  const entries = Object.entries(betTypes)
-  const fee = entries.reduce((prev, currentEntry) => {
-    const [key, value] = currentEntry as [BetType, number]
-    if (key === 'set') return prev + (2 * (value ?? 0))
-    return prev + ((value ?? 0) * 1)
-  }, 0)
+  const price = gameInfo.ticket_price
+  const doublePrice = gameInfo.ticket_price * 2n
+
+  const formattedPrice = formatUnits(price, decimals)
+  const formattedDoublePrice = formatUnits(doublePrice, decimals)
+
+  const formattedBalance = balance === undefined ? '- -' : formatUnits(balance, decimals)
+  const formattedFee = formatUnits(fee, decimals)
 
   return (
-    <section className={styles.container}>
-      <Stack gap={'20px'}>
-        <HStack alignItems={'center'} gap={3}>
-          <p>Fees: </p>
+    <Stack alignItems={'stretch'} w={200}>
+      {/* fee */}
+      <section className={styles.container}>
+        <Stack gap={'20px'} >
+          <HStack justifyContent={'space-between'} alignItems={'center'} gap={3}>
+            <p>Fees: </p>
+            <HStack alignItems={'center'} gap={1}>
+              <Image
+                alt='fee token'
+                src={'/icon-tokens/ic-usdc.svg'}
+                width={20}
+                height={20}
+              />
+              <span>{roundString(formattedFee, 2)}</span>
+
+            </HStack>
+          </HStack>
+          {showDetail && <p>
+            {formattedPrice} {symbol ?? ''} for Straight, Box, and Mini types.<br />
+            {formattedDoublePrice} {symbol ?? ''} for Set type.
+          </p>}
+        </Stack>
+      </section>
+
+      {/* user balance */}
+      {isBalanceEnough !== undefined &&
+        <HStack alignItems={'center'} justifyContent={'space-between'} gap={3}>
+          <p>Balance: </p>
           <HStack alignItems={'center'} gap={1}>
             <Image
               alt='fee token'
@@ -31,16 +63,13 @@ const FeeSection: FC<Prop> = ({ showDetail }) => {
               width={20}
               height={20}
             />
-            <span>{roundString(String(fee), 2)}</span>
+            <span style={isBalanceEnough ? {} : { color: COLOR.Warning }}>
+              {roundString(formattedBalance, 2)}
+            </span>
           </HStack>
-        </HStack>
+        </HStack>}
+    </Stack>
 
-        {showDetail && <p>
-          1 USDC for Straight, Box, and Mini types.<br />
-          2 USDC for Set type.
-        </p>}
-      </Stack>
-    </section>
   )
 }
 

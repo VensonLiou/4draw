@@ -68,7 +68,7 @@ export default function Home() {
   // 如果正在開獎
   if (isRevealing) setPageName('revealing')
 
-  // redirect = 'revealing'
+  redirect = 'place-bet'
 
   const PAGE_MAP: { [page in PageName]: ReactNode } = {
     "last-round": <LastRoundPage />,

@@ -14,27 +14,40 @@ import useGame from '@/hooks/useGame'
 import useGameInfo from '@/hooks/useGameInfo'
 import usePaymentToken from '@/hooks/usePaymentToken'
 import { asyncWrapper } from '@/utils/asyncWrapper'
-import { formatUnits } from '@/utils/parseUnits'
 import { betTypesInvalid, userNumbersInvalid } from '@/utils/stateCheck'
-import { roundString } from '@/utils/utils'
-import { HStack, Stack } from '@chakra-ui/react'
 import { useAccount } from '@starknet-react/core'
-import Image from 'next/image'
 import { useState } from 'react'
 
 const PlaceBetPage = () => {
-  const { address: userAddress } = useAccount()
   const [, setPage] = usePage()
+  const [isBuying, setIsBuying] = useState(false);
+
   const [userNumbers] = useUserNumbers()
   const [betTypes] = useBetTypes()
+
   const { approveAndBuy } = useGame()
-  const { balance, decimals, refetchPaymentToken } = usePaymentToken()
-  const { refetchInfo } = useGameInfo()
+  const { refetchInfo, gameInfo } = useGameInfo()
+  const { balance, refetchPaymentToken } = usePaymentToken()
+
+  const { address: userAddress } = useAccount()
+
+
+  const price = gameInfo.ticket_price
+  const doublePrice = gameInfo.ticket_price * 2n
+  const entries = Object.entries(betTypes)
+  const fee = entries.reduce((prev, currentEntry) => {
+    const [key, value] = currentEntry
+    if (key === 'set') return prev + BigInt(value ?? 0n) * doublePrice
+    return prev + (BigInt(value ?? 0n) * price)
+  }, 0n)
+
+  const isBalanceEnough = (balance ?? Infinity) >= fee
+
+  const disableNext = userNumbersInvalid(userNumbers) || betTypesInvalid(betTypes) || !userAddress || !isBalanceEnough
 
   const back = () => setPage('choose-bet-type')
   const toNext = () => setPage('bet-placed')
 
-  const [isBuying, setIsBuying] = useState(false);
   const buy = () => asyncWrapper({
     name: 'buy',
     shouldToast: true,
@@ -49,17 +62,13 @@ const PlaceBetPage = () => {
     onSuccess: () => toNext()
   })
 
-  const disableNext = userNumbersInvalid(userNumbers) || betTypesInvalid(betTypes) || !userAddress
-
-  const formattedBalance = balance === undefined ? '- -' : formatUnits(balance, decimals)
-
   return (
     <ContentContainer>
 
       <StepContainer >
         <StepTitle step={3} title="Connect Wallet" />
         <StepContentContainer>
-          <p style={{ fontSize: 20, marginBottom: 160 }}>
+          <p style={{ fontSize: 20, marginBottom: 80 }}>
             Please connect your wallet to place your bet.
           </p>
         </StepContentContainer>
@@ -71,25 +80,8 @@ const PlaceBetPage = () => {
         <StepContentContainer gap={20}>
           <YourNumber />
           <BetTypeSummarySection />
-
-          <Stack alignItems={'stretch'} w={200}>
-            <FeeSection />
-            {/* user balance */}
-            <HStack alignItems={'center'} justifyContent={'space-between'} gap={3}>
-              <p>Balance: </p>
-              <HStack alignItems={'center'} gap={1}>
-                <Image
-                  alt='fee token'
-                  src={'/icon-tokens/ic-usdc.svg'}
-                  width={20}
-                  height={20}
-                />
-                <span>{roundString(formattedBalance, 2)}</span>
-              </HStack>
-            </HStack>
-          </Stack>
+          <FeeSection fee={fee} isBalanceEnough={isBalanceEnough} />
         </StepContentContainer>
-
       </StepContainer>
 
 

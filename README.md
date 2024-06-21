@@ -4,6 +4,37 @@
 
 [Demo](https://draw-49019.web.app/)
 
+## How to Play
+
+1. Selecting Numbers:
+    - Players need to select 4 numbers from 0 to 9.
+    - Numbers can be repeated.
+2. Choosing Bet Types:
+    - Straight
+    - Box
+    - Set (Straight/Box)
+    - Mini
+3. Prize Rule:
+    - If there are winners, winners share the accumulated total amount of money spent on purchasing this type of lottery ticket.
+    - If there is no winner, the prize will roll over to the next game.
+
+### Straight
+
+- The selected 4-digit number must match the drawn 4-digit number in exact order.
+
+### Box
+
+- The selected 4-digit number must match the drawn 4-digit number in any order.
+- The odds of winning vary depending on whether the numbers chosen are unique or repeated.
+
+### Set (Straight/Box)
+
+- A combination of both Straight and Box bets. Players have the chance to win either or both types of prizes.
+
+### Mini
+
+- The last 3 digits of the selected 4-digit number must match the last 3 digits of the drawn number.
+
 ## Smart Contract
 
 ### Installation

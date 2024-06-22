@@ -46,7 +46,7 @@ const LastRoundPage = () => {
         ))}
       </HStack>
 
-      {gameNotStarted && <p>Please wait for game manager to start a new round.</p>}
+      {!userPlayedBefore && waitingForNextRound && <p>Please wait for game manager to start a new round.</p>}
 
       {userPlayedBefore ? <>
         <YourNumber _userNumbers={userLatestRoundNumber} />

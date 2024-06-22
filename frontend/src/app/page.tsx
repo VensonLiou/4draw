@@ -41,10 +41,11 @@ export default function Home() {
   // 判斷是否正在開獎
   const isRevealing = gameInfo?.game_status === 'Revealing'
 
-  // console.log(latestTicketsResult.userLatestRound , latestGameRound)
+  // console.log(latestTicketsResult.userLatestRound, latestGameRound)
   // console.log(alreadyBought)
-  // console.log(isRevealed) 
   // console.log(isEnded)
+  // console.log(isRevealed)
+  // console.log(isRevealing)
   // console.log(pageName)
 
   let redirect: PageName = pageName
@@ -55,12 +56,10 @@ export default function Home() {
   else if (pageName === 'last-round' && isFirstRound) redirect = 'choose-number'
 
   // 有前一輪，已買票，但本輪還沒結束，改去下注完成頁面
-  else if (!isEnded && alreadyBought) redirect = 'bet-placed'
+  else if (alreadyBought && !isEnded) redirect = 'bet-placed'
 
-  // 有前一輪，未買票，本輪結束但未開獎，改去開獎頁面
-  else if (!alreadyBought && isEnded && !isRevealed) redirect = 'open-prize'
-
-
+  // 有前一輪，本輪結束但未開獎，無論有沒有買票，都改去開獎頁面
+  else if (isEnded && !isRevealed) redirect = 'open-prize'
 
   // 但若已開獎，直接跳去結果頁
   if (isRevealed) setPageName('last-round')

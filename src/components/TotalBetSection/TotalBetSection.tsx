@@ -1,7 +1,7 @@
 import useGameInfo from '@/hooks/useGameInfo'
 import usePaymentToken from '@/hooks/usePaymentToken'
 import { formatUnits } from '@/utils/parseUnits'
-import { addString, commafy } from '@/utils/utils'
+import { addString, commafy, roundString } from '@/utils/utils'
 import { FC } from 'react'
 import styles from './TotalBetSection.module.css'
 
@@ -9,10 +9,10 @@ const TotalBetSection = () => {
   const { gameInfo } = useGameInfo()
   const { decimals, symbol } = usePaymentToken()
 
-  const straightBets = formatUnits(gameInfo.total_straight_prize_accumulated, decimals)
-  const BoxBets = formatUnits(gameInfo.total_box_prize_accumulated, decimals)
-  const miniBets = formatUnits(gameInfo.total_mini_prize_accumulated, decimals)
-  const totalBets = addString(addString(straightBets, BoxBets), miniBets)
+  const straightBets = roundString(formatUnits(gameInfo.total_straight_prize_accumulated, decimals), 2)
+  const BoxBets = roundString(formatUnits(gameInfo.total_box_prize_accumulated, decimals), 2)
+  const miniBets = roundString(formatUnits(gameInfo.total_mini_prize_accumulated, decimals), 2)
+  const totalBets = roundString(addString(addString(straightBets, BoxBets), miniBets), 2)
 
   return (
     <section className={styles.container}>

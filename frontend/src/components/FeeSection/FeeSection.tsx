@@ -27,6 +27,8 @@ const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
   const formattedBalance = balance === undefined ? '- -' : formatUnits(balance, decimals)
   const formattedFee = formatUnits(fee, decimals)
 
+  const mintAmount = 100n * 10n ** BigInt(decimals ?? 0)
+
   return (
     <Stack alignItems={'stretch'} w={200}>
       {/* fee */}
@@ -70,8 +72,8 @@ const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
         </HStack>}
 
       {!isBalanceEnough &&
-        <Button size="sm" onClick={mintTPT}>
-          Mint 100 TPT (for test)
+        <Button size="sm" onClick={() => mintTPT(mintAmount)}>
+          Mint 100 {symbol} (for test)
         </Button>}
     </Stack>
 

@@ -104,7 +104,7 @@ type Prop = {
   args?: any[]
 }
 
-const checkRunWait = async ({ contract, account, functionName, args }: Prop) => {
+export const checkRunWait = async ({ contract, account, functionName, args }: Prop) => {
   if (!contract || !account) return toast.error('contract not ready.')
   if (!args) args = []
 

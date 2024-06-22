@@ -2,7 +2,7 @@ import useGameInfo from '@/hooks/useGameInfo'
 import usePaymentToken from '@/hooks/usePaymentToken'
 import { formatUnits } from '@/utils/parseUnits'
 import { roundString } from '@/utils/utils'
-import { HStack, Stack } from '@chakra-ui/react'
+import { Button, HStack, Stack } from '@chakra-ui/react'
 import Image from 'next/image'
 import { FC } from 'react'
 import styles from './FeeSection.module.css'
@@ -16,7 +16,7 @@ interface Prop {
 
 const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
   const { gameInfo } = useGameInfo()
-  const { balance, decimals, symbol } = usePaymentToken()
+  const { balance, decimals, symbol, mintTPT } = usePaymentToken()
 
   const price = gameInfo.ticket_price
   const doublePrice = gameInfo.ticket_price * 2n
@@ -68,6 +68,11 @@ const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
             </span>
           </HStack>
         </HStack>}
+
+      {!isBalanceEnough &&
+        <Button size="sm" onClick={mintTPT}>
+          Mint 100 TPT (for test)
+        </Button>}
     </Stack>
 
   )

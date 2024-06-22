@@ -42,12 +42,12 @@ const usePaymentToken = () => {
   account && contract?.connect(account)
 
 
-  const mintTPT = async () => {
+  const mintTPT = async (amount: bigint) => {
     await checkRunWait({
       account,
       contract,
       functionName: 'mint',
-      args: [userAddress, 100000_00000_00000_00000n]
+      args: [userAddress, amount]
     })
   }
 

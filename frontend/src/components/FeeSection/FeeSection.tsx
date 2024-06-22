@@ -30,11 +30,11 @@ const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
   const mintAmount = 100n * 10n ** BigInt(decimals ?? 0)
 
   return (
-    <Stack alignItems={'stretch'} w={200}>
+    <Stack alignItems={'flex-start'} minW={180}>
       {/* fee */}
       <section className={styles.container}>
-        <Stack gap={'20px'} >
-          <HStack justifyContent={'space-between'} alignItems={'center'} gap={3}>
+        <Stack gap={'20px'} alignItems={'stretch'} w={'100%'}>
+          <HStack justifyContent={'space-between'} alignItems={'center'} gap={3} w={'100%'}>
             <p>Fees: </p>
             <HStack alignItems={'center'} gap={1}>
               <Image
@@ -56,7 +56,7 @@ const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
 
       {/* user balance */}
       {isBalanceEnough !== undefined &&
-        <HStack alignItems={'center'} justifyContent={'space-between'} gap={3}>
+        <HStack alignItems={'center'} justifyContent={'space-between'} gap={3} w={'100%'}>
           <p>Balance: </p>
           <HStack alignItems={'center'} gap={1}>
             <Image
@@ -72,7 +72,7 @@ const FeeSection: FC<Prop> = ({ showDetail, fee, isBalanceEnough }) => {
         </HStack>}
 
       {!isBalanceEnough &&
-        <Button size="sm" onClick={() => mintTPT(mintAmount)}>
+        <Button  size="sm" onClick={() => mintTPT(mintAmount)}>
           Mint 100 {symbol} (for test)
         </Button>}
     </Stack>

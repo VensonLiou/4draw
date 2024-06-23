@@ -2,56 +2,86 @@ use starknet::ContractAddress;
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct GameInfo {
+    /// @notice Price for a single ticket
     pub ticket_price: u256,
+    /// @notice Ended timestamp in second of the game
     pub end_time: u64,
+    /// @notice Request id returned by randomness contract
     pub randomness_request_id: u64,
+    /// @notice Revealed number in range 0~9999 
     pub result_number: u16,
+    /// @notice Game status, including not started, started, revealing, ended
     pub game_status: GameStatus,
+    /// @notice Total prize accumulated for the straight prize pool
     pub total_straight_prize_accumulated: u256,
+    /// @notice Total prize accumulated for the box prize pool
     pub total_box_prize_accumulated: u256,
+    /// @notice Total prize accumulated for the mini prize pool
     pub total_mini_prize_accumulated: u256
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct PrizeInfo {
+    /// @notice Total number of straight tickets won in the game round
     pub total_straight_won: u256,
+    /// @notice Total number of box tickets won in the game round
     pub total_box_won: u256,
+    /// @notice Total number of mini tickets won in the game round
     pub total_mini_won: u256,
+    /// @notice Claimable prize of a single won straight ticket
     pub single_straight_prize: u256,
+    /// @notice Claimable prize of a single won box ticket
     pub single_box_prize: u256,
+    /// @notice Claimable prize of a single won mini ticket
     pub single_mini_prize: u256
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct UserTicketInfo {
+    /// @notice Picked number of the user in the game round
     pub picked_number: u16,
+    /// @notice Whether user claimed the prize of the won tickets
     pub claimed: bool,
+    /// @notice Number of straight tickets bought by the user in the game round
     pub straight_amount: u256,
+    /// @notice Number of box tickets bought by the user in the game round
     pub box_amount: u256,
+    /// @notice Number of set tickets bought by the user in the game round
     pub set_amount: u256,
+    /// @notice Number of mini tickets bought by the user in the game round
     pub mini_amount: u256
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct TicketCounter {
+    /// @notice Total straight tickets of the number in the game round
     pub straight_amount: u256,
+    /// @notice Total box tickets of the number in the game round
     pub box_amount: u256,
+    /// @notice Total mini tickets of the number in the game round
     pub mini_amount: u256
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct RevealConfig {
+    /// @notice Max fee (callback fee + premium fee) for randomness contract
     pub max_fee: u256,
+    /// @notice Max callback fee for randomness contract
     pub callback_fee_limit: u128,
+    /// @notice Min block delay for randomness contract
     pub publish_delay: u64,
 }
 
 #[derive(PartialEq, Copy, Drop, Serde, starknet::Store)]
 pub enum GameStatus {
     #[default]
+    /// @notice Game not initiated
     NotStarted,
+    /// @notice In game
     Started,
+    /// @notice Revealing the result
     Revealing,
+    /// @notice Game ended
     Ended
 }
 
@@ -194,6 +224,7 @@ pub mod FourDraw {
     
     #[derive(Drop, starknet::Event)]
     struct NewGameStarted {
+        #[key]
         round: u256,
         ticket_price: u256,
         end_time: u64
@@ -201,18 +232,21 @@ pub mod FourDraw {
 
     #[derive(Drop, starknet::Event)]
     struct GameRevealRequested {
+        #[key]
         round: u256,
         request_id: u64
     }
 
     #[derive(Drop, starknet::Event)]
     struct GameRevealed {
+        #[key]
         round: u256,
         result_number: u16
     }
 
     #[derive(Drop, starknet::Event)]
     struct TicketsBought {
+        #[key]
         account: ContractAddress,
         ticket_info: UserTicketInfo,
         total_cost: u256
@@ -220,6 +254,7 @@ pub mod FourDraw {
 
     #[derive(Drop, starknet::Event)]
     struct PrizeClaimed {
+        #[key]
         account: ContractAddress,
         round: u256,
         prize: u256 
@@ -246,50 +281,86 @@ pub mod FourDraw {
 
     #[abi(embed_v0)]
     impl FourDrawImpl of super::IFourDraw<ContractState> {
+        /// @notice Get randomness contract address
+        /// @return address Randomness contract address
         fn randomness_contract(self: @ContractState) -> ContractAddress {
             self.randomness_contract.read()
         }
 
+        /// @notice Get randomness payment token address
+        /// @return address Randomness payment token address
         fn randomness_payment_token(self: @ContractState) -> ContractAddress {
             self.randomness_payment_token.read()
         }
 
+        /// @notice Get ticket payment token address
+        /// @return address Ticket payment token address
         fn ticket_payment_token(self: @ContractState) -> ContractAddress {
             self.ticket_payment_token.read()
         }
 
+        /// @notice Get reveal config for randomness contract
+        /// @return config Reveal config for randomness contract
         fn reveal_config(self: @ContractState) -> RevealConfig {
             self.reveal_config.read()
         }
 
+        /// @notice Get latest game round
+        /// @return round Latest game round
         fn latest_game_round(self: @ContractState) -> u256 {
             self.latest_game_round.read()
         }
 
+        /// @notice Get prize info of the game round
+        /// @param round Game round
+        /// @return info Prize info of the game round
         fn prize_info(self: @ContractState, round: u256) -> PrizeInfo {
             self.prize_info.read(round)
         }
 
+        /// @notice Get game info of the game round
+        /// @param round Game round
+        /// @return info Game info of the game round
         fn game_info(self: @ContractState, round: u256) -> GameInfo {
             self.game_info.read(round)
         }
 
+        /// @notice Get ticket amount of the game round and the picked number
+        /// @param round Game round
+        /// @param picked_number Picked number of the ticket
+        /// @return counter Ticket amount of the game round and the picked number
         fn ticket_counter(self: @ContractState, round: u256, picked_number: u16) -> TicketCounter {
             self.ticket_counter.read((round, picked_number))
         }
 
+        /// @notice Get ticket amount of the game round and the picked number
+        /// @param account User address
+        /// @return user_latest_round Latest game round the user participated
         fn user_latest_round(self: @ContractState, account: ContractAddress) -> u256 {
             self.user_latest_round.read(account)
         }
 
+        /// @notice Get user's tickets of the game round
+        /// @param account User address
+        /// @param round Game round
+        /// @return tickets User's tickets of the game round
         fn user_tickets(self: @ContractState, account: ContractAddress, round: u256) -> UserTicketInfo {
             self.user_tickets.read((account, round))
         }
 
+        /// @notice Get detailed info of user's tickets
+        /// @param account User address
+        /// @return user_latest_round Latest game round the user participated
+        /// @return revealed Whether user claimed the prize of the won tickets
+        /// @return user_tickets User's tickets of the game round
+        /// @return unclaimed_prize Unclaimed won prize
         fn latest_tickets_result(self: @ContractState, account: ContractAddress) -> (u256, bool, UserTicketInfo, u256) {
             self._latest_tickets_result(account)
         }
 
+        /// @notice Set reveal config for randomness contract
+        /// @notice Only the owner can do this
+        /// @param reveal_config Reveal config for randomness contract
         fn set_reveal_config(ref self: ContractState, reveal_config: RevealConfig) {
             self.ownable.assert_only_owner();
 
@@ -298,6 +369,10 @@ pub mod FourDraw {
             self.emit(RevealConfigUpdated { reveal_config: reveal_config });
         }
 
+        /// @notice Start a new game round
+        /// @notice Only the owner can do this
+        /// @param ticket_price Price for a single ticket
+        /// @param end_time Ended timestamp in second of the game
         fn start_new_game(ref self: ContractState, ticket_price: u256, end_time: u64) {
             self.ownable.assert_only_owner();
             let (round, game_info) = self._get_latest_game();
@@ -314,13 +389,13 @@ pub mod FourDraw {
             if game_info.game_status == GameStatus::Ended {
                 let prize_info = self.prize_info.read(round);
                 if prize_info.total_straight_won == 0 {
-                    total_straight_prize_accumulated += game_info.total_straight_prize_accumulated;
+                    total_straight_prize_accumulated = game_info.total_straight_prize_accumulated;
                 }
                 if prize_info.total_box_won == 0 {
-                    total_box_prize_accumulated += game_info.total_box_prize_accumulated;
+                    total_box_prize_accumulated = game_info.total_box_prize_accumulated;
                 }
                 if prize_info.total_mini_won == 0 {
-                    total_mini_prize_accumulated += game_info.total_mini_prize_accumulated;
+                    total_mini_prize_accumulated = game_info.total_mini_prize_accumulated;
                 }
             }
 
@@ -339,6 +414,9 @@ pub mod FourDraw {
             self.emit(NewGameStarted { round: new_game_round, ticket_price: ticket_price, end_time: end_time });
         }
 
+        /// @notice Request drawing result for the current game
+        /// @notice Anyone can do this once the time and game status conditions met
+        /// @param seed Random seed that feeds into the verifiable random algorithm, must be different every time. (ref: Pragma's doc)
         fn request_reveal_result(ref self: ContractState, seed: u64) {
             self.reentrancy_guard.start();
             let (round, mut game_info) = self._get_latest_game();
@@ -367,6 +445,12 @@ pub mod FourDraw {
             self.reentrancy_guard.end();
         }
 
+        /// @notice Callback function for randomness contract (ref: Pragma's doc)
+        /// @notice Only randomness contract can do this
+        /// @param requestor_address Address that submitted the randomness request
+        /// @param request_id Id of the randomness request
+        /// @param random_words An span of random words
+        /// @param calldata Calldata passed in the random request, no calldata for this contract
         fn receive_random_words(
             ref self: ContractState,
             requestor_address: ContractAddress,
@@ -401,6 +485,13 @@ pub mod FourDraw {
             self.reentrancy_guard.end();
         }
 
+        /// @notice Buy tickets for the current game round
+        /// @param picked_number Picked number of the user in the game round
+        /// @param straight_amount Number of straight tickets bought by the user in the game round
+        /// @param box_amount Number of box tickets bought by the user in the game round
+        /// @param set_amount Number of set tickets bought by the user in the game round
+        /// @param mini_amount Number of mini tickets bought by the user in the game round
+        /// @return total_cost Total cost of tickets
         fn buy_tickets(
             ref self: ContractState,
             picked_number: u16,
@@ -464,6 +555,8 @@ pub mod FourDraw {
             total_cost
         }
 
+        /// @notice Claim prize for the won tickets of the latest participated game round
+        /// @return prize Total claimed prize
         fn claim_prize(ref self: ContractState) -> u256 {
             self.reentrancy_guard.start();
 

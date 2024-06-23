@@ -92,14 +92,14 @@ snforge test
 
 ```bash
 Starknet Sepolia
-0x070ad323d5aa791cca6460cf801171fd2c8b5bf72bf9067a4f4319666409b7f8
+0x07930b491ce13d96b27081fe82d1f492e72b781bb985a20febac9cb4e87488f0
 ```
 
 - Deployed contract address
 
 ```bash
 Starknet Sepolia
-0x075cd6d5e8febb1bc35e9bd2c5dac790a23326a64ee72a25c976087977f580a1
+0x06cfc5dbe6d07ebcb756bdb15055bb067ff2406eef770494204113dccd0adb01
 ```
 
 #### ticket_payment_token
